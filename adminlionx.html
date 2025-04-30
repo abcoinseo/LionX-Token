@@ -3,1034 +3,1144 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Comprehensive Admin Panel</title>
-    <!-- Font Awesome CDN -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <title>Meme Wolf - Pro Admin Panel (NO LOGIN - LOCAL USE ONLY)</title> {/* Changed Title */}
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
     <style>
-        /* --- Basic Reset & Defaults (Same as previous 'pro' example) --- */
+        /* --- Global Styles & Reset (Keep ALL CSS from previous version) --- */
+        :root {
+            --admin-bg: #ecf0f5; --sidebar-bg: #222d32; --sidebar-text: #b8c7ce; --sidebar-hover-bg: #1e282c; --sidebar-hover-text: #ffffff; --header-bg: #3c8dbc; --header-text: #ffffff; --box-blue: #00c0ef; --box-green: #00a65a; --box-yellow: #f39c12; --box-red: #dd4b39; --box-aqua: #0073b7; --box-purple: #605ca8; --link-color: #3c8dbc; --button-primary-bg: #3c8dbc; --button-primary-hover-bg: #367fa9; --button-danger-bg: #dd4b39; --button-danger-hover-bg: #d73925; --button-success-bg: #00a65a; --button-success-hover-bg: #008d4c; --button-warning-bg: #f39c12; --button-warning-hover-bg: #e08e0b; --text-color-dark: #333; --danger-text: #dd4b39; --text-muted: #777;
+        }
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f6f9; color: #444; display: flex; min-height: 100vh; line-height: 1.6; font-size: 14px; }
-        a { text-decoration: none; color: inherit; }
-        ul { list-style: none; }
-        button { cursor: pointer; font-family: inherit; padding: 8px 15px; border-radius: 4px; border: 1px solid transparent; transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease; }
-        input[type="text"], input[type="number"], input[type="url"], input[type="datetime-local"], textarea, select { width: 100%; padding: 8px 10px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; }
-        textarea { resize: vertical; min-height: 60px; }
-        label { display: block; margin-bottom: 5px; font-weight: 500; color: #555; }
-        .form-group { margin-bottom: 15px; }
-        .form-check { display: flex; align-items: center; }
-        .form-check input[type="checkbox"] { width: auto; margin-right: 8px; margin-bottom: 0; }
-        .config-block { background-color: #fff; padding: 20px; border-radius: 5px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 20px; }
-        .config-block h3 { margin-top: 0; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid #eee; font-size: 1.1rem; color: #333; }
+        body { font-family: 'Source Sans Pro', 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: var(--admin-bg); font-size: 14px; color: var(--text-color-dark); display: flex; min-height: 100vh; flex-direction: column; }
+        a { color: var(--link-color); text-decoration: none; }
+        a:hover { color: #72afd2; }
 
-        /* --- Layout (Same as previous) --- */
-        .wrapper { display: flex; width: 100%; }
-        .sidebar { width: 240px; background-color: #343a40; color: #c2c7d0; display: flex; flex-direction: column; flex-shrink: 0; transition: width 0.3s ease; }
-        .sidebar-header { background-color: #007bff; padding: 15px 20px; text-align: left; font-size: 1.2rem; font-weight: bold; color: #fff; display: flex; justify-content: space-between; align-items: center; height: 60px; }
-        .sidebar-nav { padding-top: 10px; flex-grow: 1; }
-        .sidebar-nav ul { padding: 0; margin: 0; }
-        .sidebar-nav li a { display: flex; align-items: center; padding: 10px 20px; color: #c2c7d0; transition: background-color 0.2s ease, color 0.2s ease; border-left: 3px solid transparent; }
-        .sidebar-nav li a:hover { background-color: #495057; color: #fff; }
-        .sidebar-nav li.active a { background-color: #007bff; color: #fff; font-weight: 500; border-left-color: #ffffff; }
-        .sidebar-nav li a i { margin-right: 12px; width: 20px; text-align: center; font-size: 1.1em; }
+        /* --- Login --- REMOVED --- */
 
-        .main-content { flex-grow: 1; display: flex; flex-direction: column; background-color: #e9ecf0; overflow-x: hidden; }
-        .top-bar { background-color: #ffffff; border-bottom: 1px solid #dee2e6; padding: 0 25px; display: flex; justify-content: space-between; align-items: center; height: 60px; flex-shrink: 0; }
-        .top-bar .breadcrumb { font-size: 0.95rem; color: #6c757d; }
-        .top-bar .breadcrumb a { color: #007bff; }
-        .top-bar .user-menu { font-weight: 500; color: #343a40; cursor: pointer; }
+        .security-warning { /* Keep this style for warnings inside the panel */
+            color: var(--danger-text); font-weight: bold; margin-bottom: 15px; border: 1px solid var(--danger-text); padding: 8px; background-color: #ffebee; border-radius: 3px; text-align: left; font-size: 0.9em;
+        }
+        .security-warning strong { color: #c62828; }
 
-        /* --- Page Content & Sections --- */
-        .page-content { padding: 25px; flex-grow: 1; overflow-y: auto; }
-        .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 1px solid #dee2e6;}
-        .page-header h1 { font-size: 1.7rem; font-weight: 500; color: #333; margin: 0;}
-        .content-section { display: none; }
+        /* --- Layout --- */
+        /* Make admin wrapper visible by default */
+        #admin-wrapper { display: flex; flex-direction: column; flex-grow: 1; }
+        .main-header { background-color: var(--header-bg); color: var(--header-text); padding: 0 15px; height: 50px; display: flex; justify-content: space-between; align-items: center; position: fixed; width: 100%; top: 0; left: 0; z-index: 1001; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .logo { font-size: 1.5em; font-weight: bold; color: var(--header-text); text-decoration: none; }
+        .logo:hover { text-decoration: none; color: #f1f1f1; }
+        .navbar-custom-menu { display: flex; align-items: center; }
+        /* Removed logout button styles implicitly by removing button */
+
+        .main-sidebar { position: fixed; top: 50px; left: 0; bottom: 0; width: 230px; background-color: var(--sidebar-bg); color: var(--sidebar-text); padding-top: 15px; z-index: 1000; overflow-y: auto; transition: width 0.3s ease; }
+        .sidebar-menu { list-style: none; padding: 0; margin: 0; }
+        .sidebar-menu li a { display: flex; align-items: center; padding: 12px 15px; color: var(--sidebar-text); transition: background-color 0.2s, color 0.2s; white-space: nowrap; overflow: hidden; }
+        .sidebar-menu li a:hover { background-color: var(--sidebar-hover-bg); color: var(--sidebar-hover-text); }
+        .sidebar-menu li.active > a { background-color: var(--sidebar-hover-bg); color: var(--sidebar-hover-text); font-weight: bold; }
+        .sidebar-menu li a .material-icons { vertical-align: middle; margin-right: 8px; font-size: 18px; min-width: 20px; }
+        .content-wrapper { margin-top: 50px; margin-left: 230px; padding: 20px; background-color: var(--admin-bg); flex-grow: 1; transition: margin-left 0.3s ease; }
+        .content-header { margin-bottom: 20px; border-bottom: 1px solid #d2d6de; padding-bottom: 10px;}
+        .content-header h1 { font-size: 1.8em; margin: 0; font-weight: 400; }
+        .content-header small { font-size: 0.7em; color: var(--text-muted); margin-left: 5px;}
+        .content-section { display: none; animation: fadeIn 0.4s ease-out; }
         .content-section.active { display: block; }
 
-        /* --- Buttons & Badges (Same as previous) --- */
-        .btn { display: inline-block; font-weight: 400; text-align: center; vertical-align: middle; user-select: none; background-color: transparent; border: 1px solid transparent; padding: 0.375rem 0.75rem; font-size: 0.9rem; /* Adjusted size */ line-height: 1.5; border-radius: 0.25rem; transition: color .15s ease-in-out,background-color .15s ease-in-out,border-color .15s ease-in-out,box-shadow .15s ease-in-out; }
-        .btn-primary { color: #fff; background-color: #007bff; border-color: #007bff; }
-        .btn-primary:hover { background-color: #0056b3; border-color: #0056b3; }
-        .btn-danger { color: #fff; background-color: #dc3545; border-color: #dc3545; }
-        .btn-danger:hover { background-color: #c82333; border-color: #bd2130; }
-        .btn-warning { color: #212529; background-color: #ffc107; border-color: #ffc107; }
-        .btn-warning:hover { color: #212529; background-color: #e0a800; border-color: #d39e00; }
-        .btn-secondary { color: #fff; background-color: #6c757d; border-color: #6c757d; }
-        .btn-secondary:hover { background-color: #5a6268; border-color: #545b62; }
-        .btn-success { color: #fff; background-color: #28a745; border-color: #28a745; }
-        .btn-success:hover { background-color: #218838; border-color: #1e7e34; }
-        .btn-sm { padding: 0.25rem 0.5rem; font-size: 0.8rem; line-height: 1.5; border-radius: 0.2rem; }
-        .action-buttons button { margin: 0 3px; }
-        .badge { display: inline-block; padding: .25em .4em; font-size: 75%; font-weight: 700; line-height: 1; text-align: center; white-space: nowrap; vertical-align: baseline; border-radius: .25rem; }
-        .badge-success { color: #fff; background-color: #28a745; }
-        .badge-secondary { color: #fff; background-color: #6c757d; }
-        .badge-info { color: #fff; background-color: #17a2b8; }
-        .badge-warning { color: #212529; background-color: #ffc107; }
+        /* --- Components (Keep ALL from previous version) --- */
+        .info-box-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 15px; margin-bottom: 20px; }
+        .info-box { background-color: white; border-radius: 3px; padding: 15px; display: flex; align-items: center; box-shadow: 0 1px 3px rgba(0,0,0,0.1); overflow: hidden; transition: transform 0.2s ease; }
+        .info-box:hover { transform: translateY(-3px); box-shadow: 0 4px 8px rgba(0,0,0,0.15); }
+        .info-box-icon { width: 70px; height: 70px; border-radius: 3px; display: flex; justify-content: center; align-items: center; font-size: 36px; color: white; margin-right: 15px; flex-shrink: 0; }
+        .info-box-content { flex-grow: 1; }
+        .info-box-text { text-transform: uppercase; font-size: 0.9em; color: var(--text-muted); display: block; margin-bottom: 2px; }
+        .info-box-number { font-size: 1.8em; font-weight: bold; color: var(--text-color-dark); display: block; line-height: 1.2; }
+        .bg-aqua { background-color: var(--box-aqua); } .bg-green { background-color: var(--box-green); } .bg-yellow { background-color: var(--box-yellow); } .bg-red { background-color: var(--box-red); } .bg-blue { background-color: var(--box-blue); } .bg-purple { background-color: var(--box-purple); }
 
+        .box { background-color: #fff; border-radius: 3px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 20px; border-top: 3px solid var(--button-primary-bg); }
+        .box-header { padding: 10px 15px; border-bottom: 1px solid #f4f4f4; display: flex; justify-content: space-between; align-items: center; }
+        .box-title { font-size: 1.2em; font-weight: 600; margin: 0; }
+        .box-tools { display: flex; gap: 5px; }
+        .box-body { padding: 15px; }
+        .box-footer { padding: 10px 15px; border-top: 1px solid #f4f4f4; background-color: #f9f9f9; text-align: right; }
 
-        /* --- Tables (Same as previous) --- */
-        .table-container { background-color: #fff; padding: 20px; border-radius: 5px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); overflow-x: auto; }
-        .table { width: 100%; border-collapse: collapse; margin-bottom: 1rem; background-color: transparent; }
-        .table th, .table td { padding: 0.75rem; vertical-align: middle; border-top: 1px solid #dee2e6; text-align: left; font-size: 0.9em; }
-        .table thead th { vertical-align: bottom; border-bottom: 2px solid #dee2e6; background-color: #f8f9fa; font-weight: 600; color: #495057; white-space: nowrap; }
-        .table tbody tr:hover { background-color: rgba(0, 0, 0, 0.05); }
-        .table td .long-text { max-width: 200px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: inline-block; vertical-align: middle; }
-        .table td .link-text { color: #007bff; }
-        .table td .link-text:hover { text-decoration: underline; }
-        .loading-row td { text-align: center; padding: 20px; font-style: italic; color: #666; }
+        .table { width: 100%; border-collapse: collapse; margin-bottom: 15px; background-color: #fff; }
+        .table th, .table td { border: 1px solid #f4f4f4; padding: 8px 10px; text-align: left; vertical-align: middle; font-size: 0.9em; }
+        .table th { background-color: #f9f9f9; font-weight: 600; white-space: nowrap; }
+        .table td .material-icons { font-size: 18px; vertical-align: middle; }
+        .table-actions { white-space: nowrap; }
+        .table-actions button { margin: 1px 2px; padding: 3px 6px; font-size: 0.8em; }
+        .table tbody tr:hover { background-color: #f5f5f5; }
+        .table-striped tbody tr:nth-of-type(odd) { background-color: #f9f9f9; }
+        .table-striped tbody tr:nth-of-type(odd):hover { background-color: #f0f0f0; }
+        .table-empty-row td { text-align: center; color: var(--text-muted); padding: 20px; font-style: italic; }
 
-        /* --- Dashboard Info Boxes --- */
-        .info-boxes { display: grid; gap: 20px; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); margin-bottom: 25px;}
-        .info-box { color: #fff; padding: 15px; border-radius: 5px; display: flex; flex-direction: column; justify-content: space-between; position: relative; min-height: 100px; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); overflow: hidden; }
-        .info-box .inner { z-index: 1; }
-        .info-box .info-box-number { font-size: 2rem; font-weight: bold; display: block; margin-bottom: 5px; }
-        .info-box .info-box-text { font-size: 0.95rem; margin-bottom: 10px; }
-        .info-box .icon { position: absolute; top: 10px; right: 15px; font-size: 50px; color: rgba(0, 0, 0, 0.15); z-index: 0; transition: transform 0.3s ease; }
-        .info-box:hover .icon { transform: scale(1.1); }
-        .info-box.bg-aqua { background-color: #17a2b8; }
-        .info-box.bg-green { background-color: #28a745; }
-        .info-box.bg-yellow { background-color: #ffc107; color: #333;}
-        .info-box.bg-red { background-color: #dc3545; }
-        .info-box.bg-purple { background-color: #6f42c1; }
-        .info-box.bg-orange { background-color: #fd7e14; }
+        /* --- Forms & Buttons (Keep ALL from previous version) --- */
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 5px; font-weight: 600; font-size: 0.95em; }
+        .form-control { width: 100%; padding: 8px 10px; border: 1px solid #d2d6de; border-radius: 3px; font-size: 1em; box-shadow: inset 0 1px 1px rgba(0,0,0,.075); transition: border-color ease-in-out .15s,box-shadow ease-in-out .15s; }
+        .form-control:focus { border-color: var(--link-color); outline: 0; box-shadow: inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(60, 141, 188, 0.6); }
+        select.form-control { height: 34px; appearance: none; -webkit-appearance: none; background: white url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23007CB2%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E') no-repeat right .75rem center/8px 10px; padding-right: 25px; }
+        textarea.form-control { min-height: 80px; }
+        input[type="datetime-local"].form-control, input[type="number"].form-control { height: 34px; }
+        input[type="url"].form-control { font-family: monospace; }
 
-        /* --- Modals (Same base style, specific IDs used) --- */
-        .modal { display: none; position: fixed; z-index: 1050; left: 0; top: 0; width: 100%; height: 100%; overflow-y: auto; /* Enable scroll */ outline: 0; background-color: rgba(0, 0, 0, 0.5); }
-        .modal.show { display: block; }
-        .modal-dialog { position: relative; width: auto; margin: 30px auto; /* Smaller top margin */ max-width: 600px; pointer-events: none; }
-        .modal-content { position: relative; display: flex; flex-direction: column; width: 100%; pointer-events: auto; background-color: #fff; background-clip: padding-box; border: 1px solid rgba(0, 0, 0, 0.2); border-radius: 0.3rem; outline: 0; }
-        .modal-header { display: flex; align-items: flex-start; justify-content: space-between; padding: 1rem 1rem; border-bottom: 1px solid #dee2e6; }
-        .modal-title { margin-bottom: 0; line-height: 1.5; font-size: 1.25rem; font-weight: 500;}
-        .modal-header .close { padding: 1rem 1rem; margin: -1rem -1rem -1rem auto; background-color: transparent; border: 0; font-size: 1.5rem; font-weight: 700; line-height: 1; color: #000; text-shadow: 0 1px 0 #fff; opacity: .5; cursor: pointer;}
-        .modal-header .close:hover { opacity: .75; }
-        .modal-body { position: relative; flex: 1 1 auto; padding: 1rem; max-height: 65vh; /* Limit body height */ overflow-y: auto; /* Scroll modal body if needed */ }
-        .modal-footer { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; padding: 0.75rem; border-top: 1px solid #dee2e6; }
-        .modal-footer > * { margin: 0.25rem; }
+        .btn { border: none; border-radius: 3px; padding: 6px 12px; cursor: pointer; font-size: 0.9em; transition: background-color 0.2s, border-color 0.2s, box-shadow 0.2s; display: inline-flex; align-items: center; justify-content: center; gap: 5px; line-height: 1.42857143; vertical-align: middle; text-align: center; white-space: nowrap; }
+        .btn:disabled { cursor: not-allowed; opacity: 0.65; }
+        .btn:active { box-shadow: inset 0 3px 5px rgba(0,0,0,.125); }
+        .btn-primary { background-color: var(--button-primary-bg); color: white; border: 1px solid var(--button-primary-bg); } .btn-primary:hover { background-color: var(--button-primary-hover-bg); border-color: var(--button-primary-hover-bg); }
+        .btn-danger { background-color: var(--button-danger-bg); color: white; border: 1px solid var(--button-danger-bg); } .btn-danger:hover { background-color: var(--button-danger-hover-bg); border-color: var(--button-danger-hover-bg); }
+        .btn-success { background-color: var(--button-success-bg); color: white; border: 1px solid var(--button-success-bg); } .btn-success:hover { background-color: var(--button-success-hover-bg); border-color: var(--button-success-hover-bg); }
+        .btn-warning { background-color: var(--button-warning-bg); color: white; border: 1px solid var(--button-warning-bg); } .btn-warning:hover { background-color: var(--button-warning-hover-bg); border-color: var(--button-warning-hover-bg); }
+        .btn-default { background-color: #f4f4f4; color: #444; border: 1px solid #ddd; } .btn-default:hover { background-color: #e7e7e7; border-color: #ccc; }
+        .btn-sm { padding: 5px 10px; font-size: 12px; }
+        .btn-xs { padding: 2px 6px; font-size: 12px; }
+        .btn .material-icons { font-size: 1.2em; line-height: 1; }
+        .pull-right { float: right !important; }
+
+        /* --- Messages & Status (Keep ALL from previous version) --- */
+        .form-status, .modal-status { min-height: 1.5em; font-weight: bold; margin-top: 10px; padding: 5px 0; }
+        .error-message { color: var(--box-red); font-size: 0.9em; }
+        .success-message { color: var(--box-green); font-size: 0.9em; }
+        .loading-message { color: var(--text-muted); font-style: italic; font-size: 0.9em;}
+        .text-red { color: var(--box-red) !important; }
+        .text-green { color: var(--box-green) !important; }
+        .text-muted { color: var(--text-muted) !important; }
+        .text-bold { font-weight: bold !important; }
+        .status-indicator { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 5px; flex-shrink: 0; }
+        .status-active { background-color: var(--box-green); }
+        .status-banned { background-color: var(--box-red); }
+        .status-expired { background-color: #777; }
+        .status-inactive { background-color: #bbb; }
+        .dimmed { opacity: 0.6; font-style: italic; }
+
+        /* --- Modals (Keep ALL from previous version) --- */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.6); display: none; justify-content: center; align-items: center; z-index: 1050; backdrop-filter: blur(2px); -webkit-backdrop-filter: blur(2px); animation: fadeIn 0.3s ease-out; padding: 15px; }
+        .modal-overlay.visible { display: flex; }
+        .modal-content { background: white; color: var(--text-color-dark); padding: 0; border-radius: 5px; box-shadow: 0 5px 20px rgba(0,0,0,0.3); width: 100%; max-width: 650px; text-align: left; animation: slideIn 0.3s ease-out; max-height: 90vh; display: flex; flex-direction: column; overflow: hidden; }
+        .modal-header { padding: 15px 20px; border-bottom: 1px solid #e5e5e5; background-color: #f9f9f9; }
+        .modal-title { font-size: 1.3em; font-weight: 600; color: var(--text-color-dark); margin: 0; line-height: 1.4; }
+        .modal-body { padding: 20px; overflow-y: auto; flex-grow: 1;}
+        .modal-input { width: 100%; padding: 10px; margin-bottom: 15px; border-radius: 3px; border: 1px solid #ccc; background-color: #fff; color: var(--text-color-dark); font-size: 1em; }
+        .modal-actions { display: flex; gap: 10px; justify-content: flex-end; padding: 15px 20px; border-top: 1px solid #eee; background-color: #f5f5f5; }
+        .modal-button { /* Inherits .btn styles */ }
+        .modal-button.cancel { background: #aaa; color: white; border-color: #aaa; } .modal-button.cancel:hover { background: #999; border-color: #999; }
+
+        /* --- Specific Components (Keep ALL from previous version) --- */
+        .inline-button-group { border: 1px solid #ddd; padding: 10px; margin-bottom: 15px; border-radius: 3px; background-color: #fafafa; }
+        .inline-button-row { display: flex; gap: 10px; margin-bottom: 8px; align-items: center; }
+        .inline-button-row input { flex: 1; }
+        .inline-button-row button { flex-shrink: 0; }
+        #autopilot-info { font-size: 0.9em; color: #555; margin-bottom: 15px; padding: 10px; background-color: #f9f9f9; border: 1px solid #eee; border-radius: 3px; }
+        .time-input-group { display: flex; gap: 10px; align-items: baseline; flex-wrap: wrap; }
+        .time-input-group > div { flex: 1; min-width: 80px; }
+        .time-input-group label { font-size: 0.85em; color: #555; display: block; text-align: center; margin-bottom: 2px;}
+        .time-input-group input { text-align: center; }
+        #task-table img, #template-table img { width: 30px; height: 30px; border-radius: 3px; vertical-align: middle; margin-right: 8px; object-fit: cover; background-color: #eee; }
+        .label { display: inline-block; padding: .2em .6em .3em; font-size: 75%; font-weight: 700; line-height: 1; color: #fff; text-align: center; white-space: nowrap; vertical-align: baseline; border-radius: .25em; }
+        .label.bg-purple { background-color: var(--box-purple); }
+        .label.bg-blue { background-color: var(--box-blue); }
+        code { background-color: #f1f1f1; padding: 2px 4px; border-radius: 3px; font-family: monospace; }
+        .task-status-icon { font-size: 1.2em; vertical-align: middle; }
+
+        /* --- Animations (Keep ALL from previous version) --- */
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideIn { from { transform: translateY(-20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        /* Removed shake animation as login error is gone */
+
+        /* --- Flash Message Style (Keep ALL from previous version) --- */
+        .flash-message { position: fixed; top: 60px; right: 20px; padding: 12px 20px; border-radius: 4px; color: #fff; z-index: 2010; opacity: 0; transform: translateX(100%); box-shadow: 0 2px 10px rgba(0,0,0,0.2); transition: opacity 0.4s ease-out, transform 0.4s ease-out; }
+        .flash-message.show { opacity: 0.95; transform: translateX(0); }
+        .flash-message.success { background-color: var(--box-green); }
+        .flash-message.warning { background-color: var(--box-yellow); }
+        .flash-message.error { background-color: var(--box-red); }
+        .flash-message.info { background-color: var(--box-blue); }
 
     </style>
 </head>
 <body>
-    <div class="wrapper">
-        <!-- Sidebar -->
-        <aside class="sidebar">
-            <div class="sidebar-header">
-                <span>Admin Panel</span>
-            </div>
-            <nav class="sidebar-nav">
-                <ul id="sidebar-menu">
-                    <li data-target="dashboard-content" class="active"><a href="#"><i class="fas fa-tachometer-alt"></i> <span>Dashboard</span></a></li>
-                    <li data-target="task-manager-content"><a href="#"><i class="fas fa-tasks"></i> <span>Task Management</span></a></li>
-                    <li data-target="user-manager-content"><a href="#"><i class="fas fa-users"></i> <span>User Management</span></a></li>
-                    <li data-target="luckycode-manager-content"><a href="#"><i class="fas fa-ticket-alt"></i> <span>Lucky Codes</span></a></li>
-                    <li data-target="template-manager-content"><a href="#"><i class="fas fa-envelope-open-text"></i> <span>Msg Templates</span></a></li>
-                    <li data-target="config-manager-content"><a href="#"><i class="fas fa-cogs"></i> <span>Configuration</span></a></li>
-                </ul>
+
+    <!-- Login Screen REMOVED -->
+
+    <!-- Main Admin Panel (Visible by default) -->
+    <div id="admin-wrapper">
+        <header class="main-header">
+            <a href="#" class="logo" onclick="showSection('dashboard', document.querySelector('.sidebar-menu a[href=\'#dashboard\']')); return false;"><b>MemeWolf</b>Admin</a>
+            <nav class="navbar-custom-menu">
+                 <!-- Logout Button REMOVED -->
             </nav>
+        </header>
+
+        <aside class="main-sidebar">
+            <section class="sidebar">
+                <ul class="sidebar-menu">
+                    <li class="active"><a href="#dashboard" onclick="showSection('dashboard', this)"><i class="material-icons">dashboard</i> <span>Dashboard</span></a></li>
+                    <li><a href="#users" onclick="showSection('users', this)"><i class="material-icons">people</i> <span>User Management</span></a></li>
+                    <li><a href="#tasks" onclick="showSection('tasks', this)"><i class="material-icons">checklist</i> <span>Task Management</span></a></li>
+                    <li><a href="#luckycodes" onclick="showSection('luckycodes', this)"><i class="material-icons">card_giftcard</i> <span>Lucky Codes</span></a></li>
+                    <li><a href="#templates" onclick="showSection('templates', this)"><i class="material-icons">description</i> <span>Message Templates</span></a></li>
+                    <li><a href="#autopilot" onclick="showSection('autopilot', this)"><i class="material-icons">schedule</i> <span>Autopilot Config</span></a></li>
+                </ul>
+            </section>
         </aside>
 
-        <!-- Main Content -->
-        <div class="main-content">
-            <!-- Top Bar -->
-            <header class="top-bar">
-                 <div class="breadcrumb" id="breadcrumb">
-                    <a href="#"><i class="fas fa-home"></i> Home</a> / Dashboard
-                 </div>
-                 <div class="user-menu">
-                    Admin User <i class="fas fa-caret-down"></i>
-                 </div>
-            </header>
+        <div class="content-wrapper">
+            <!-- Section: Dashboard -->
+            <section id="dashboard" class="content-section active">
+                <div class="content-header"><h1>Dashboard <small>Control panel overview</small></h1></div>
+                 <p class="security-warning">
+                     <strong>EXTREME SECURITY RISK:</strong> Login has been removed for local use ONLY. This admin panel operates with exposed client-side credentials (Firebase Keys, Bot Token). All actions are performed directly from your browser.
+                     <br><strong>DO NOT HOST THIS OR MAKE IT ACCESSIBLE EXTERNALLY.</strong> Implement a secure backend if this needs to be accessed remotely or shared.
+                 </p>
+                <div class="info-box-container">
+                     <div class="info-box"> <span class="info-box-icon bg-aqua"><i class="material-icons">people</i></span> <div class="info-box-content"> <span class="info-box-text">Total Users</span> <span class="info-box-number" id="stat-total-users">...</span> </div> </div>
+                     <div class="info-box"> <span class="info-box-icon bg-yellow"><i class="material-icons">account_balance_wallet</i></span> <div class="info-box-content"> <span class="info-box-number" id="stat-total-coins">...</span> <span class="info-box-text">Total Coins (Approx)</span></div> </div>
+                     <div class="info-box"> <span class="info-box-icon bg-green"><i class="material-icons">task_alt</i></span> <div class="info-box-content"> <span class="info-box-text">Active Tasks</span> <span class="info-box-number" id="stat-total-tasks">...</span> </div> </div>
+                     <div class="info-box"> <span class="info-box-icon bg-red"><i class="material-icons">military_tech</i></span> <div class="info-box-content"> <span class="info-box-number" id="stat-total-rewards">...</span><span class="info-box-text">Total Task Rewards</span> </div> </div>
+                     <div class="info-box"> <span class="info-box-icon bg-purple"><i class="material-icons">card_giftcard</i></span> <div class="info-box-content"> <span class="info-box-text">Active Lucky Codes</span> <span class="info-box-number" id="stat-lucky-codes">...</span> </div> </div>
+                </div>
+            </section>
 
-            <!-- Page Content Area -->
-            <main class="page-content">
+            <!-- Section: User Management -->
+            <section id="users" class="content-section">
+                 <div class="content-header"><h1>User Management</h1></div>
+                 <div class="box">
+                     <div class="box-header"><h3 class="box-title">All Users</h3></div>
+                     <div class="box-body">
+                        <div id="user-list-status" class="loading-message text-muted">Loading users...</div>
+                        <table id="user-table" class="table table-bordered table-striped" style="display:none;">
+                            <thead> <tr> <th>User ID</th> <th>Username</th> <th>Name</th> <th>Coins</th> <th>TON Wallet</th> <th>Status</th> <th>Last Update</th> <th>Actions</th> </tr> </thead>
+                            <tbody id="user-table-body"></tbody>
+                        </table>
+                    </div>
+                 </div>
+            </section>
 
-                <!-- Dashboard Section -->
-                <div id="dashboard-content" class="content-section active">
-                     <div class="page-header"><h1>Dashboard</h1></div>
-                     <div class="info-boxes">
-                         <div class="info-box bg-aqua">
-                            <span class="icon"><i class="fas fa-users"></i></span>
-                            <div class="inner">
-                                <h3 class="info-box-number" id="dashboard-users-count">0</h3>
-                                <p class="info-box-text">Total Users</p>
+            <!-- Section: Task Management -->
+            <section id="tasks" class="content-section">
+                 <div class="content-header"><h1>Task Management</h1></div>
+                 <div class="box" id="task-form-box" style="display: none;"> <!-- Form Box -->
+                     <div class="box-header"><h3 class="box-title" id="task-form-title">Add New Task</h3></div>
+                     <form id="task-form">
+                         <input type="hidden" id="task-edit-id">
+                         <div class="box-body">
+                            <div class="form-group"> <label for="task-name">Task Name</label> <input type="text" class="form-control" id="task-name" required> </div>
+                            <div class="form-group"> <label for="task-description">Description</label> <textarea class="form-control" id="task-description" rows="3"></textarea> </div>
+                            <div class="form-group"> <label for="task-imageUrl">Image URL (Optional)</label> <input type="url" class="form-control" id="task-imageUrl" placeholder="https://..."> </div>
+                            <div class="form-group"> <label for="task-reward">Reward (Coins)</label> <input type="number" class="form-control" id="task-reward" required min="0"> </div>
+                            <div class="form-group"> <label for="task-link">Task URL / Link</label> <input type="url" class="form-control" id="task-link" placeholder="https://..." required> <small class="text-muted">Required for both types. For 'Code' type, this might be a link to the community where the code is found.</small> </div>
+                            <div class="form-group"> <label for="task-type">Task Type</label> <select class="form-control" id="task-type" required> <option value="link">Link Verification (Timed)</option> <option value="code">Code Entry</option> </select> </div>
+
+                            <!-- Link Verification Time (Only for 'link' type) -->
+                            <div class="form-group" id="task-verification-time-group" style="display: block;">
+                                <label for="task-verification-time">Verification Time (seconds)</label>
+                                <input type="number" class="form-control" id="task-verification-time" min="0" value="10">
+                                <small class="text-muted">Required for 'Link' type. Time user must spend on the linked page.</small>
                             </div>
-                         </div>
-                         <div class="info-box bg-green">
-                            <span class="icon"><i class="fas fa-tasks"></i></span>
-                            <div class="inner">
-                                <h3 class="info-box-number" id="dashboard-tasks-count">0</h3>
-                                <p class="info-box-text">Active Tasks</p>
+
+                            <!-- Code field (Only for 'code' type) -->
+                            <div class="form-group" id="task-code-group" style="display: none;">
+                                <label for="task-code">Verification Code</label>
+                                <input type="text" class="form-control" id="task-code">
+                                <small class="text-muted">Required for 'Code' type. The exact code users need to enter.</small>
                             </div>
-                         </div>
-                          <div class="info-box bg-yellow">
-                            <span class="icon"><i class="fas fa-ticket-alt"></i></span>
-                            <div class="inner">
-                                <h3 class="info-box-number" id="dashboard-luckycodes-count">0</h3>
-                                <p class="info-box-text">Active Lucky Codes</p>
+
+                            <div class="form-group">
+                                <label for="task-isActive">Active Status</label>
+                                <select class="form-control" id="task-isActive" required>
+                                    <option value="true">Active (Visible to users)</option>
+                                    <option value="false">Inactive (Hidden from users)</option>
+                                </select>
                             </div>
+
+                            <div id="task-form-error" class="form-status error-message"></div>
                          </div>
-                         <div class="info-box bg-purple">
-                            <span class="icon"><i class="fas fa-envelope-open-text"></i></span>
-                            <div class="inner">
-                                <h3 class="info-box-number" id="dashboard-templates-count">0</h3>
-                                <p class="info-box-text">Message Templates</p>
-                            </div>
+                         <div class="box-footer">
+                             <button type="button" class="btn btn-default" onclick="hideTaskForm()">Cancel</button>
+                             <button type="submit" class="btn btn-success pull-right">Save Task</button>
                          </div>
+                     </form>
+                 </div>
+                 <div class="box"> <!-- Task List Box -->
+                     <div class="box-header">
+                        <h3 class="box-title">All Tasks</h3>
+                        <div class="box-tools">
+                            <button class="btn btn-primary btn-sm" onclick="showAddTaskForm()"> <i class="material-icons">add</i> Add New Task </button>
+                        </div>
+                    </div>
+                     <div class="box-body">
+                         <div id="task-list-status" class="loading-message text-muted">Loading tasks...</div>
+                         <table id="task-table" class="table table-bordered table-hover" style="display:none;">
+                            <thead> <tr> <th>Name</th> <th>Type</th> <th>Status</th> <th>Reward</th> <th>Link</th> <th>Code/Time</th> <th>Actions</th> </tr> </thead>
+                            <tbody id="task-table-body"></tbody>
+                        </table>
                      </div>
-                     <p>Overview of system statistics.</p>
-                </div>
+                 </div>
+            </section>
 
-                <!-- Task Management Section -->
-                <div id="task-manager-content" class="content-section">
-                    <div class="page-header">
-                        <h1>Task Management</h1>
-                        <button id="add-task-button" class="btn btn-primary"><i class="fas fa-plus"></i> Add New Task</button>
+            <!-- Section: Lucky Code Management -->
+            <section id="luckycodes" class="content-section">
+                 <div class="content-header"><h1>Lucky Code Management</h1></div>
+                 <div class="box" id="luckycode-form-box" style="display: none;"> <!-- Form Box -->
+                     <div class="box-header"><h3 class="box-title" id="luckycode-form-title">Add New Lucky Code</h3></div>
+                     <form id="luckycode-form">
+                        <input type="hidden" id="luckycode-edit-id">
+                        <div class="box-body">
+                            <div class="form-group"> <label for="luckycode-code">Code (Case-insensitive, e.g., WOLFMOON42)</label> <input type="text" class="form-control" id="luckycode-code" required style="text-transform: uppercase;"> </div>
+                            <div class="form-group"> <label for="luckycode-reward">Reward (Coins)</label> <input type="number" class="form-control" id="luckycode-reward" required min="1"> </div>
+                            <div class="form-group"> <label for="luckycode-expiry">Expiry Date & Time (Optional)</label> <input type="datetime-local" class="form-control" id="luckycode-expiry"> <small class="text-muted">Leave blank for no expiry. Bot/server must check validity upon claim.</small> </div>
+                            <div id="luckycode-form-error" class="form-status error-message"></div>
+                        </div>
+                        <div class="box-footer">
+                            <button type="button" class="btn btn-default" onclick="hideLuckyCodeForm()">Cancel</button>
+                            <button type="submit" class="btn btn-success pull-right">Save Lucky Code</button>
+                        </div>
+                     </form>
+                 </div>
+                 <div class="box"> <!-- List Box -->
+                     <div class="box-header">
+                        <h3 class="box-title">Active & Expired Lucky Codes</h3>
+                        <div class="box-tools">
+                             <button class="btn btn-primary btn-sm" onclick="showAddLuckyCodeForm()"> <i class="material-icons">add</i> Add Lucky Code </button>
+                        </div>
                     </div>
-                    <div class="table-container">
-                        <table class="table">
-                            <thead>
-                                <tr>
-                                    <th>Name</th>
-                                    <th>Reward</th>
-                                    <th>Type</th>
-                                    <th>Link/Target</th>
-                                    <th>Active</th>
-                                    <th>Created</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody id="tasks-table-body">
-                                <tr class="loading-row"><td colspan="7">Loading tasks...</td></tr>
-                            </tbody>
+                     <div class="box-body">
+                         <div id="luckycode-list-status" class="loading-message text-muted">Loading lucky codes...</div>
+                         <table id="luckycode-table" class="table table-bordered table-hover" style="display:none;">
+                            <thead> <tr> <th>Code</th> <th>Reward</th> <th>Expiry Date</th> <th>Status</th> <th>Actions</th> </tr> </thead>
+                            <tbody id="luckycode-table-body"></tbody>
                         </table>
-                    </div>
-                </div>
+                     </div>
+                 </div>
+            </section>
 
-                 <!-- User Management Section -->
-                 <div id="user-manager-content" class="content-section">
-                     <div class="page-header"><h1>User Management</h1></div>
-                      <div class="table-container">
-                            <table class="table">
-                                <thead>
-                                    <tr>
-                                        <th>User ID</th>
-                                        <th>Username</th>
-                                        <th>Name</th>
-                                        <th>Coins</th>
-                                        <th>Wallet</th>
-                                        <th>Last Update</th>
-                                        <th>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="users-table-body">
-                                    <tr class="loading-row"><td colspan="7">Loading users...</td></tr>
-                                </tbody>
-                            </table>
-                      </div>
-                </div>
-
-                <!-- Lucky Code Management Section -->
-                <div id="luckycode-manager-content" class="content-section">
-                    <div class="page-header">
-                        <h1>Lucky Codes Management</h1>
-                        <button id="add-luckycode-button" class="btn btn-primary"><i class="fas fa-plus"></i> Add Lucky Code</button>
+             <!-- Section: Message Templates -->
+            <section id="templates" class="content-section">
+                 <div class="content-header"><h1>Message Templates</h1></div>
+                 <div class="box" id="template-form-box" style="display: none;"> <!-- Form Box -->
+                     <div class="box-header"><h3 class="box-title" id="template-form-title">Create/Edit Template</h3></div>
+                     <form id="template-form">
+                        <input type="hidden" id="template-edit-id">
+                        <div class="box-body">
+                            <div class="form-group"> <label for="template-name">Template Name (for identification)</label> <input type="text" class="form-control" id="template-name" required> </div>
+                            <div class="form-group"> <label for="template-text">Message Text</label> <textarea class="form-control" id="template-text" rows="5"></textarea> <small class="text-muted">Supports basic HTML: &lt;b&gt;, &lt;i&gt;, &lt;a href="..."&gt;, &lt;code&gt;, &lt;pre&gt;</small> </div>
+                            <div class="form-group"> <label for="template-image">Image URL (Optional)</label> <input type="url" class="form-control" id="template-image" placeholder="https://..."> </div>
+                            <div class="form-group"> <label>Inline Buttons (Optional - Max 5 rows):</label> <div class="inline-button-group" id="template-buttons-container"> <p class="text-muted text-center" style="margin: 5px 0; font-size: 0.9em;" id="template-buttons-placeholder">No buttons added.</p> </div> <button type="button" class="btn btn-default btn-sm" onclick="addTemplateButtonRow()"> <i class="material-icons">add</i> Add Button Row </button> </div>
+                            <div id="template-form-error" class="form-status error-message"></div>
+                        </div>
+                        <div class="box-footer">
+                             <button type="button" class="btn btn-default" onclick="hideTemplateForm()">Cancel</button>
+                             <button type="submit" class="btn btn-success pull-right">Save Template</button>
+                         </div>
+                    </form>
+                 </div>
+                 <div class="box"> <!-- List Box -->
+                     <div class="box-header">
+                        <h3 class="box-title">Saved Templates</h3>
+                        <div class="box-tools">
+                            <button class="btn btn-primary btn-sm" onclick="showAddTemplateForm()"> <i class="material-icons">add</i> Create New Template </button>
+                        </div>
                     </div>
-                    <div class="table-container">
-                        <table class="table">
-                            <thead>
-                                <tr>
-                                    <th>Code</th>
-                                    <th>Reward</th>
-                                    <th>Expiry Date</th>
-                                    <th>Status</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody id="luckycodes-table-body">
-                                <tr class="loading-row"><td colspan="5">Loading lucky codes...</td></tr>
-                            </tbody>
+                     <div class="box-body">
+                         <div id="template-list-status" class="loading-message text-muted">Loading templates...</div>
+                         <table id="template-table" class="table table-bordered table-hover" style="display:none;">
+                            <thead> <tr> <th>Name</th> <th>Preview</th> <th>Actions</th> </tr> </thead>
+                            <tbody id="template-table-body"></tbody>
                         </table>
-                    </div>
-                </div>
+                     </div>
+                 </div>
+            </section>
 
-                <!-- Message Template Management Section -->
-                <div id="template-manager-content" class="content-section">
-                     <div class="page-header">
-                        <h1>Message Template Management</h1>
-                        <button id="add-template-button" class="btn btn-primary"><i class="fas fa-plus"></i> Add Template</button>
-                    </div>
-                    <div class="table-container">
-                        <table class="table">
-                            <thead>
-                                <tr>
-                                    <th>Name</th>
-                                    <th>Text</th>
-                                    <th>Image</th>
-                                    <th>Created</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody id="templates-table-body">
-                                <tr class="loading-row"><td colspan="5">Loading templates...</td></tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
+             <!-- Section: Autopilot Config -->
+             <section id="autopilot" class="content-section">
+                 <div class="content-header"><h1>Autopilot Configuration</h1></div>
+                 <div class="security-warning"><strong>Important:</strong> This section only SAVES the configuration to Firebase. A separate, secure **SERVER-SIDE SCRIPT** or **BOT LOGIC** is required to READ this config and actually PERFORM the automated actions (scheduling tasks, sending welcome messages). This panel CANNOT run these automations by itself reliably or securely.</div>
 
-                <!-- Configuration Section -->
-                <div id="config-manager-content" class="content-section">
-                    <div class="page-header"><h1>Configuration</h1></div>
-
-                    <!-- Daily Lucky Code Block -->
-                    <div class="config-block">
-                        <h3>Daily Lucky Code</h3>
-                        <form id="daily-lucky-code-form">
-                            <div class="form-group">
-                                <label for="config-daily-code">Code</label>
-                                <input type="text" id="config-daily-code" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="config-daily-reward">Reward</label>
-                                <input type="number" id="config-daily-reward" required min="0">
-                            </div>
-                            <button type="submit" class="btn btn-success"><i class="fas fa-save"></i> Save Daily Code</button>
-                        </form>
-                    </div>
-
-                     <!-- Autopilot Config Block -->
-                    <div class="config-block">
-                         <h3>Autopilot Configuration</h3>
-                         <form id="autopilot-config-form">
-                             <h4>Welcome Message</h4>
+                 <!-- Recurring Task Config -->
+                 <div class="box">
+                     <div class="box-header"><h3 class="box-title">Recurring Daily Task</h3></div>
+                     <form id="autopilot-recurring-task-form">
+                         <div class="box-body">
+                             <p id="autopilot-info">Configure ONE task to be automatically added and/or removed daily. The server/bot must handle the timing (typically around midnight) and check the task's 'isActive' status.</p>
                              <div class="form-group">
-                                 <label for="config-welcome-delay">Delay (Milliseconds)</label>
-                                 <input type="number" id="config-welcome-delay" min="0">
-                             </div>
-                             <div class="form-group">
-                                 <label for="config-welcome-template">Template ID</label>
-                                 <select id="config-welcome-template">
-                                     <option value="">-- Select Template --</option>
-                                     <!-- Options added by JS -->
+                                 <label for="autopilot-task-select">Select Task to Recur:</label>
+                                 <select id="autopilot-task-select" class="form-control">
+                                     <option value="">-- None (Disable Recurring Task) --</option>
+                                     <!-- Options populated by JS -->
                                  </select>
                              </div>
-                             <hr>
-                              <h4>Recurring Task</h4>
+                             <div id="autopilot-task-status" class="form-status"></div>
+                         </div>
+                         <div class="box-footer">
+                            <button type="submit" class="btn btn-primary">Save Recurring Task Setting</button>
+                         </div>
+                     </form>
+                 </div>
+
+                 <!-- Welcome Message Config (REFINED TIMER) -->
+                  <div class="box">
+                     <div class="box-header"><h3 class="box-title">Automated Welcome Message</h3></div>
+                     <form id="autopilot-welcome-message-form">
+                         <div class="box-body">
+                             <p id="autopilot-info">Configure a message to be sent automatically to new users after a specific delay. Requires server/bot logic.</p>
                              <div class="form-group">
-                                 <label for="config-recurring-task">Task ID</label>
-                                  <select id="config-recurring-task">
-                                     <option value="">-- Select Task --</option>
-                                      <!-- Options added by JS -->
+                                 <label for="autopilot-template-select">Select Welcome Message Template:</label>
+                                 <select id="autopilot-template-select" class="form-control">
+                                      <option value="">-- None (Disable Welcome Message) --</option>
+                                      <!-- Options populated by JS -->
                                  </select>
                              </div>
-                             <button type="submit" class="btn btn-success"><i class="fas fa-save"></i> Save Autopilot Config</button>
-                         </form>
-                    </div>
-                </div>
+                             <div class="form-group">
+                                 <label>Delay after User Joins:</label>
+                                 <div class="time-input-group">
+                                     <div>
+                                         <label for="autopilot-welcome-delay-min">Minutes</label>
+                                         <input type="number" id="autopilot-welcome-delay-min" class="form-control" min="0" value="0" required>
+                                     </div>
+                                      <div>
+                                         <label for="autopilot-welcome-delay-sec">Seconds</label>
+                                         <input type="number" id="autopilot-welcome-delay-sec" class="form-control" min="0" max="59" value="5" required>
+                                      </div>
+                                      <div>
+                                         <label for="autopilot-welcome-delay-ms">Milliseconds</label>
+                                         <input type="number" id="autopilot-welcome-delay-ms" class="form-control" min="0" max="999" value="0" required>
+                                      </div>
+                                 </div>
+                                 <small class="text-muted">Total delay = (Mins * 60000) + (Secs * 1000) + MS. Saved as milliseconds. Server implements the delay.</small>
+                             </div>
+                             <div id="autopilot-welcome-status" class="form-status"></div>
+                         </div>
+                          <div class="box-footer">
+                             <button type="submit" class="btn btn-primary">Save Welcome Message Setting</button>
+                          </div>
+                     </form>
+                 </div>
+             </section>
 
-            </main>
-        </div>
-    </div>
+        </div> <!-- /.content-wrapper -->
 
-    <!-- MODALS (Task, Lucky Code, Template) -->
-
-    <!-- Task Modal (Slightly modified from previous) -->
-    <div class="modal" id="task-modal">
-         <div class="modal-dialog"><div class="modal-content">
-             <form id="task-form">
-                 <div class="modal-header">
-                     <h5 class="modal-title" id="task-modal-title">Task</h5>
-                     <button type="button" class="close" data-dismiss="modal">×</button>
-                 </div>
-                 <div class="modal-body">
-                     <input type="hidden" id="task-modal-id">
-                     <div class="form-group"><label for="task-modal-name">Name</label><input type="text" id="task-modal-name" required></div>
-                     <div class="form-group"><label for="task-modal-description">Description</label><textarea id="task-modal-description"></textarea></div>
-                     <div class="form-group"><label for="task-modal-reward">Reward</label><input type="number" id="task-modal-reward" required min="0"></div>
-                     <div class="form-group"><label for="task-modal-image">Image URL</label><input type="url" id="task-modal-image"></div>
-                     <div class="form-group"><label for="task-modal-link">Link/Target URL</label><input type="url" id="task-modal-link"></div>
-                     <div class="form-group"><label for="task-modal-type">Type</label><select id="task-modal-type"><option value="link">Link Visit</option><option value="channel_join">Channel Join</option><option value="other">Other</option></select></div>
-                     <div class="form-group"><label for="task-modal-verification">Verification Time (s)</label><input type="number" id="task-modal-verification" min="0" value="10"></div>
-                     <div class="form-group form-check"><input type="checkbox" id="task-modal-active"><label for="task-modal-active">Is Active</label></div>
-                 </div>
-                 <div class="modal-footer">
-                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                     <button type="submit" class="btn btn-primary" id="task-modal-save-button">Save</button>
-                 </div>
-             </form>
-         </div></div>
-    </div>
-
-    <!-- Lucky Code Modal -->
-    <div class="modal" id="luckycode-modal">
-         <div class="modal-dialog"><div class="modal-content">
-             <form id="luckycode-form">
-                 <div class="modal-header">
-                     <h5 class="modal-title" id="luckycode-modal-title">Lucky Code</h5>
-                     <button type="button" class="close" data-dismiss="modal">×</button>
-                 </div>
-                 <div class="modal-body">
-                      <input type="hidden" id="luckycode-modal-id">
-                      <div class="form-group"><label for="luckycode-modal-code">Code</label><input type="text" id="luckycode-modal-code" required></div>
-                      <div class="form-group"><label for="luckycode-modal-reward">Reward</label><input type="number" id="luckycode-modal-reward" required min="0"></div>
-                      <div class="form-group"><label for="luckycode-modal-expiry">Expiry Date & Time</label><input type="datetime-local" id="luckycode-modal-expiry" required></div>
-                      <!-- Note: Status is calculated, not set directly -->
-                 </div>
-                 <div class="modal-footer">
-                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                     <button type="submit" class="btn btn-primary" id="luckycode-modal-save-button">Save</button>
-                 </div>
-             </form>
-         </div></div>
-    </div>
-
-    <!-- Message Template Modal -->
-    <div class="modal" id="template-modal">
-        <div class="modal-dialog modal-lg"> <!-- Wider modal for text area -->
+         <!-- Modals -->
+         <!-- User Edit Modal -->
+        <div id="user-edit-modal" class="modal-overlay">
             <div class="modal-content">
-             <form id="template-form">
+                <div class="modal-header">
+                     <h3 class="modal-title">Edit User: <span id="edit-user-id-display"></span></h3>
+                </div>
+                <div class="modal-body">
+                    <form id="user-edit-form">
+                        <input type="hidden" id="edit-user-id">
+                        <div class="form-group"> <label>Username:</label> <p><strong id="edit-user-username">N/A</strong></p> </div>
+                        <div class="form-group"> <label>Name:</label> <p><strong id="edit-user-fullname">N/A</strong></p> </div>
+                        <div class="form-group"> <label for="edit-user-coins">Coins:</label> <input type="number" id="edit-user-coins" class="form-control" required min="0"> </div>
+                        <div class="form-group"> <label for="edit-user-tonwallet">TON Wallet:</label> <input type="text" id="edit-user-tonwallet" class="form-control" placeholder="Enter TON wallet address"> </div>
+                        <div class="form-group"> <label for="edit-user-banstatus">Ban Status:</label> <select id="edit-user-banstatus" class="form-control"> <option value="false">Active</option> <option value="true">Banned</option> </select> </div>
+                        <div id="user-edit-status" class="modal-status"></div>
+                    </form>
+                </div>
+                 <div class="modal-actions">
+                    <button type="button" class="btn btn-default modal-button cancel" onclick="hideModal('user-edit-modal')">Cancel</button>
+                    <button type="submit" class="btn btn-primary modal-button" form="user-edit-form">Save Changes</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Send Message Modal -->
+        <div id="send-message-modal" class="modal-overlay">
+            <div class="modal-content">
                  <div class="modal-header">
-                     <h5 class="modal-title" id="template-modal-title">Message Template</h5>
-                     <button type="button" class="close" data-dismiss="modal">×</button>
+                    <h3 class="modal-title">Send Message to User: <span id="send-message-user-id-display"></span></h3>
                  </div>
                  <div class="modal-body">
-                      <input type="hidden" id="template-modal-id">
-                      <div class="form-group"><label for="template-modal-name">Template Name</label><input type="text" id="template-modal-name" required></div>
-                      <div class="form-group"><label for="template-modal-text">Message Text</label><textarea id="template-modal-text" rows="5" required></textarea></div>
-                      <div class="form-group"><label for="template-modal-image">Image URL (Optional)</label><input type="url" id="template-modal-image"></div>
+                    <p class="security-warning"><strong>CRITICAL SECURITY RISK:</strong> Sending messages via the Bot API directly from the client-side (like this form does) is <strong>EXTREMELY INSECURE</strong> as it exposes your Bot Token in the browser's network requests. <strong>DO NOT USE THIS IN PRODUCTION.</strong> Implement a secure backend endpoint to handle message sending.</p>
+                    <form id="send-message-form">
+                        <input type="hidden" id="send-message-user-id">
+                        <div class="form-group">
+                            <label for="send-message-template-select">Use Template (Optional):</label>
+                            <select id="send-message-template-select" class="form-control">
+                                <option value="">-- Manual Message --</option>
+                                <!-- Options populated by JS -->
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="send-message-text">Message Text:</label>
+                            <textarea id="send-message-text" class="form-control" rows="4" placeholder="Enter message text..."></textarea>
+                            <small class="text-muted">Supports basic HTML. Overridden if a template with text is selected.</small>
+                        </div>
+                        <div class="form-group">
+                            <label for="send-message-image">Image URL (Optional):</label>
+                            <input type="url" id="send-message-image" class="form-control" placeholder="https://...">
+                            <small class="text-muted">Overridden if a template with an image is selected.</small>
+                        </div>
+                        <div class="form-group">
+                            <label>Inline Buttons (Optional - Max 5 rows):</label>
+                            <div class="inline-button-group" id="send-message-buttons-container">
+                                <p class="text-muted text-center" style="margin: 5px 0; font-size: 0.9em;" id="send-message-buttons-placeholder">No buttons added.</p>
+                            </div>
+                            <button type="button" class="btn btn-default btn-sm" onclick="addSendMessageButtonRow()">
+                                <i class="material-icons">add</i> Add Button Row
+                            </button>
+                             <small class="text-muted">Overridden if a template with buttons is selected.</small>
+                        </div>
+                         <div id="send-message-status" class="modal-status"></div>
+                    </form>
                  </div>
-                 <div class="modal-footer">
-                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                     <button type="submit" class="btn btn-primary" id="template-modal-save-button">Save</button>
-                 </div>
-             </form>
-         </div></div>
-    </div>
+                 <div class="modal-actions">
+                    <button type="button" class="btn btn-default modal-button cancel" onclick="hideModal('send-message-modal')">Cancel</button>
+                    <button type="submit" class="btn btn-primary modal-button" form="send-message-form">Send Message</button>
+                </div>
+            </div>
+        </div>
+        <!-- Flash Message Container (Optional, if you want a dedicated container) -->
+        <div id="flash-message-container"></div>
 
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    </div> <!-- /#admin-wrapper -->
 
     <script>
-        // --- Firebase Configuration ---
+        // --- Config ---
+        // !!! CRITICAL SECURITY WARNING !!!
+        // DO NOT USE THESE KEYS IN PRODUCTION CLIENT-SIDE CODE. BUILD A BACKEND.
         const firebaseConfig = {
-          apiKey: "AIzaSyAjSR8Zye94K1bRELoD7dg5mqE9XoLTOHo", // USE YOUR REAL KEY
-          authDomain: "emotion-shear.firebaseapp.com",
-          databaseURL: "https://emotion-shear-default-rtdb.firebaseio.com",
-          projectId: "emotion-shear",
-          storageBucket: "emotion-shear.firebasestorage.app",
-          messagingSenderId: "603511893887",
-          appId: "1:603511893887:web:a259ece26df4a7ebc9b44a"
-        };
+  apiKey: "AIzaSyAjSR8Zye94K1bRELoD7dg5mqE9XoLTOHo",
+  authDomain: "emotion-shear.firebaseapp.com",
+  databaseURL: "https://emotion-shear-default-rtdb.firebaseio.com",
+  projectId: "emotion-shear",
+  storageBucket: "emotion-shear.firebasestorage.app",
+  messagingSenderId: "603511893887",
+  appId: "1:603511893887:web:a259ece26df4a7ebc9b44a"
+};
+        // const ADMIN_PASSWORD = "asrabu123"; // <<< REMOVED - NO LOGIN
+        const BOT_TOKEN = "7247227786:AAFPgf5XFARQ3uzz11rVAgZyw2vpHTV7k34"; // <<< NEVER expose this client-side in production!
 
-        // --- Initialize Firebase ---
-        firebase.initializeApp(firebaseConfig);
-        const database = firebase.database();
-        const tasksRef = database.ref('/tasks');
-        const usersRef = database.ref('/users');
-        const luckyCodesRef = database.ref('/luckyCodes');
-        const templatesRef = database.ref('/messageTemplates');
-        const dailyLuckyCodeRef = database.ref('/dailyLuckyCode');
-        const autopilotConfigRef = database.ref('/autopilotConfig');
+        // --- Firebase Vars ---
+        let db = null;
 
         // --- DOM Elements ---
-        const sidebarMenuItems = document.querySelectorAll('#sidebar-menu li');
+        // Login elements REMOVED
+        const adminWrapper = document.getElementById('admin-wrapper');
+        // Logout button element REMOVED
         const contentSections = document.querySelectorAll('.content-section');
-        const breadcrumb = document.getElementById('breadcrumb');
-        // Tables
-        const tasksTableBody = document.getElementById('tasks-table-body');
-        const usersTableBody = document.getElementById('users-table-body');
-        const luckyCodesTableBody = document.getElementById('luckycodes-table-body');
-        const templatesTableBody = document.getElementById('templates-table-body');
+        const sidebarLinks = document.querySelectorAll('.sidebar-menu li');
         // Dashboard Stats
-        const dashboardUsersCount = document.getElementById('dashboard-users-count');
-        const dashboardTasksCount = document.getElementById('dashboard-tasks-count');
-        const dashboardLuckyCodesCount = document.getElementById('dashboard-luckycodes-count');
-        const dashboardTemplatesCount = document.getElementById('dashboard-templates-count');
-        // Modals & Forms
-        const taskModal = document.getElementById('task-modal');
-        const luckyCodeModal = document.getElementById('luckycode-modal');
-        const templateModal = document.getElementById('template-modal');
+        const statTotalUsers = document.getElementById('stat-total-users');
+        const statTotalCoins = document.getElementById('stat-total-coins');
+        const statTotalTasks = document.getElementById('stat-total-tasks');
+        const statTotalRewards = document.getElementById('stat-total-rewards');
+        const statLuckyCodes = document.getElementById('stat-lucky-codes');
+        // User Management
+        const userTable = document.getElementById('user-table');
+        const userTableBody = document.getElementById('user-table-body');
+        const userListStatus = document.getElementById('user-list-status');
+        // Task Management
+        const taskTable = document.getElementById('task-table');
+        const taskTableBody = document.getElementById('task-table-body');
+        const taskListStatus = document.getElementById('task-list-status');
+        const taskFormBox = document.getElementById('task-form-box');
+        const taskFormTitle = document.getElementById('task-form-title');
         const taskForm = document.getElementById('task-form');
+        const taskEditIdInput = document.getElementById('task-edit-id');
+        const taskNameInput = document.getElementById('task-name');
+        const taskDescriptionInput = document.getElementById('task-description');
+        const taskImageUrlInput = document.getElementById('task-imageUrl');
+        const taskRewardInput = document.getElementById('task-reward');
+        const taskLinkInput = document.getElementById('task-link');
+        const taskTypeSelect = document.getElementById('task-type');
+        const taskCodeGroup = document.getElementById('task-code-group');
+        const taskCodeInput = document.getElementById('task-code');
+        const taskVerificationTimeGroup = document.getElementById('task-verification-time-group');
+        const taskVerificationTimeInput = document.getElementById('task-verification-time');
+        const taskIsActiveSelect = document.getElementById('task-isActive');
+        const taskFormError = document.getElementById('task-form-error');
+        // Lucky Codes
+        const luckyCodeTable = document.getElementById('luckycode-table');
+        const luckyCodeTableBody = document.getElementById('luckycode-table-body');
+        const luckyCodeListStatus = document.getElementById('luckycode-list-status');
+        const luckyCodeFormBox = document.getElementById('luckycode-form-box');
+        const luckyCodeFormTitle = document.getElementById('luckycode-form-title');
         const luckyCodeForm = document.getElementById('luckycode-form');
+        const luckyCodeEditIdInput = document.getElementById('luckycode-edit-id');
+        const luckyCodeCodeInput = document.getElementById('luckycode-code');
+        const luckyCodeRewardInput = document.getElementById('luckycode-reward');
+        const luckyCodeExpiryInput = document.getElementById('luckycode-expiry');
+        const luckyCodeFormError = document.getElementById('luckycode-form-error');
+        // Message Templates
+        const templateTable = document.getElementById('template-table');
+        const templateTableBody = document.getElementById('template-table-body');
+        const templateListStatus = document.getElementById('template-list-status');
+        const templateFormBox = document.getElementById('template-form-box');
+        const templateFormTitle = document.getElementById('template-form-title');
         const templateForm = document.getElementById('template-form');
-        const dailyLuckyCodeForm = document.getElementById('daily-lucky-code-form');
-        const autopilotConfigForm = document.getElementById('autopilot-config-form');
-        // Add/Edit Buttons
-        const addTaskButton = document.getElementById('add-task-button');
-        const addLuckyCodeButton = document.getElementById('add-luckycode-button');
-        const addTemplateButton = document.getElementById('add-template-button');
-        // Modal Close Buttons
-        const modalCloseButtons = document.querySelectorAll('.modal .close, [data-dismiss="modal"]');
-        // Config Selects
-        const configWelcomeTemplateSelect = document.getElementById('config-welcome-template');
-        const configRecurringTaskSelect = document.getElementById('config-recurring-task');
+        const templateEditIdInput = document.getElementById('template-edit-id');
+        const templateNameInput = document.getElementById('template-name');
+        const templateTextInput = document.getElementById('template-text');
+        const templateImageInput = document.getElementById('template-image');
+        const templateButtonsContainer = document.getElementById('template-buttons-container');
+        const templateButtonsPlaceholder = document.getElementById('template-buttons-placeholder');
+        const templateFormError = document.getElementById('template-form-error');
+        // Autopilot
+        const autopilotRecurringTaskForm = document.getElementById('autopilot-recurring-task-form');
+        const autopilotTaskSelect = document.getElementById('autopilot-task-select');
+        const autopilotTaskStatus = document.getElementById('autopilot-task-status');
+        const autopilotWelcomeMessageForm = document.getElementById('autopilot-welcome-message-form');
+        const autopilotTemplateSelect = document.getElementById('autopilot-template-select');
+        const autopilotWelcomeDelayMinInput = document.getElementById('autopilot-welcome-delay-min');
+        const autopilotWelcomeDelaySecInput = document.getElementById('autopilot-welcome-delay-sec');
+        const autopilotWelcomeDelayMsInput = document.getElementById('autopilot-welcome-delay-ms');
+        const autopilotWelcomeStatus = document.getElementById('autopilot-welcome-status');
+        // Modals
+        const userEditModal = document.getElementById('user-edit-modal');
+        const userEditForm = document.getElementById('user-edit-form');
+        const editUserIdInput = document.getElementById('edit-user-id');
+        const editUserIdDisplay = document.getElementById('edit-user-id-display');
+        const editUserUsername = document.getElementById('edit-user-username');
+        const editUserFullname = document.getElementById('edit-user-fullname');
+        const editUserCoinsInput = document.getElementById('edit-user-coins');
+        const editUserTonWalletInput = document.getElementById('edit-user-tonwallet');
+        const editUserBanStatusSelect = document.getElementById('edit-user-banstatus');
+        const userEditStatus = document.getElementById('user-edit-status');
+        // Send Message Modal
+        const sendMessageModal = document.getElementById('send-message-modal');
+        const sendMessageForm = document.getElementById('send-message-form');
+        const sendMessageUserIdInput = document.getElementById('send-message-user-id');
+        const sendMessageUserIdDisplay = document.getElementById('send-message-user-id-display');
+        const sendMessageTemplateSelect = document.getElementById('send-message-template-select');
+        const sendMessageTextInput = document.getElementById('send-message-text');
+        const sendMessageImageInput = document.getElementById('send-message-image');
+        const sendMessageButtonsContainer = document.getElementById('send-message-buttons-container');
+        const sendMessageButtonsPlaceholder = document.getElementById('send-message-buttons-placeholder');
+        const sendMessageStatus = document.getElementById('send-message-status');
 
 
-        // --- State ---
-        let currentEditTaskId = null;
-        let currentEditLuckyCodeId = null;
-        let currentEditTemplateId = null;
-        let allTasksData = {}; // Cache for populating selects
-        let allTemplatesData = {}; // Cache for populating selects
+        // --- Cache ---
+        let adminTasksCache = {};
+        let adminUsersCache = {};
+        let adminLuckyCodesCache = {};
+        let adminTemplatesCache = {};
+        let adminAutopilotConfigCache = {};
 
-        // --- Helper Functions ---
-        function showModal(modalElement) { modalElement.style.display = 'block'; modalElement.classList.add('show'); document.body.classList.add('modal-open'); }
-        function hideModal(modalElement) { modalElement.style.display = 'none'; modalElement.classList.remove('show'); document.body.classList.remove('modal-open'); }
-        function switchContent(targetId) { /* ... (same as previous) ... */ } // Keep the switchContent function from previous example
-        function escapeHtml(unsafe) { /* ... (same as previous) ... */ } // Keep the escapeHtml function
-        function formatTimestamp(timestamp) {
-             if (!timestamp) return 'N/A';
-             try {
-                 const date = new Date(timestamp);
-                 return date.toLocaleString(); // Adjust format as needed
-             } catch (e) { return 'Invalid Date'; }
-        }
-        function formatDateTimeForInput(timestamp) {
-            if (!timestamp) return '';
-            const date = new Date(timestamp);
-            // Format to YYYY-MM-DDTHH:mm required by datetime-local input
-            const year = date.getFullYear();
-            const month = (date.getMonth() + 1).toString().padStart(2, '0');
-            const day = date.getDate().toString().padStart(2, '0');
-            const hours = date.getHours().toString().padStart(2, '0');
-            const minutes = date.getMinutes().toString().padStart(2, '0');
-            return `${year}-${month}-${day}T${hours}:${minutes}`;
-        }
-         function parseDateTimeInput(dateTimeString) {
-             if (!dateTimeString) return null;
-             return new Date(dateTimeString).getTime(); // Convert to timestamp
-         }
+        // --- Initialization ---
+        window.onload = () => {
+            // Directly initialize panel on load
+            initializeFirebaseAndPanel();
+            console.log("Admin Panel Initializing (No Login)...");
+        };
 
+        function initializeFirebaseAndPanel() {
+            if (db) { // Already initialized
+                showAdminPanel(); // Make sure panel loads data if already init
+                return;
+            }
 
-        // --- Render Functions ---
-        function renderDashboardStats(users, tasks, codes, templates) {
-            dashboardUsersCount.textContent = users ? Object.keys(users).length : 0;
-            dashboardTasksCount.textContent = tasks ? Object.values(tasks).filter(t => t.isActive).length : 0;
-            const now = Date.now();
-            dashboardLuckyCodesCount.textContent = codes ? Object.values(codes).filter(c => c.expiryTimestamp > now).length : 0;
-            dashboardTemplatesCount.textContent = templates ? Object.keys(templates).length : 0;
-        }
-        function renderTasksTable(tasksData) { /* ... (similar to previous, use formatTimestamp) ... */ }
-        function renderUsersTable(usersData) { /* ... (similar to previous, use formatTimestamp) ... */ }
-        function renderLuckyCodesTable(codesData) { /* ... (implement using formatTimestamp for expiry, calculate status) ... */ }
-        function renderMessageTemplatesTable(templatesData) { /* ... (implement using escapeHtml and formatTimestamp) ... */ }
-        function renderConfigForm(dailyCode, autopilotConfig, tasks, templates) { /* ... (populate config form fields, populate selects) ... */ }
-        function populateSelectWithOptions(selectElement, dataObject, currentSelectionId, placeholder) {
-            selectElement.innerHTML = `<option value="">-- ${placeholder} --</option>`;
-            if (!dataObject) return;
-            Object.entries(dataObject).forEach(([id, item]) => {
-                const option = document.createElement('option');
-                option.value = id;
-                option.textContent = item.name || id; // Use name if available, otherwise ID
-                if (id === currentSelectionId) {
-                    option.selected = true;
+            try {
+                // Initialize Firebase
+                if (!firebase.apps.length) {
+                    firebase.initializeApp(firebaseConfig);
                 }
-                selectElement.appendChild(option);
-            });
+                db = firebase.database();
+                console.log("Firebase Initialized Successfully.");
+
+                setupAdminEventListeners();
+                showAdminPanel(); // Show panel and load initial data
+                console.log("Admin Panel Initialized.");
+
+            } catch (error) {
+                console.error("Firebase Initialization Error:", error);
+                // Display error message prominently if Firebase fails
+                const wrapper = document.getElementById('admin-wrapper');
+                if(wrapper) {
+                    wrapper.innerHTML = `<div style="padding: 30px; text-align: center; color: var(--box-red);">
+                        <h2>CRITICAL ERROR</h2>
+                        <p>Could not connect to Firebase database.</p>
+                        <p>Check your internet connection and the Firebase configuration in the script.</p>
+                        <p>Error: ${escapeHtml(error.message)}</p>
+                        </div>`;
+                }
+            }
         }
 
+        // --- Login / Session --- REMOVED ---
+        // checkLoginState(), handleLogin(), handleLogout(), showLogin() functions deleted.
 
-        // --- Modal Operations (Task, LuckyCode, Template) ---
-        // Task Modals (openTaskModalForAdd, openTaskModalForEdit, saveTaskData) -> Keep from previous
-        // LuckyCode Modals (openLuckyCodeModalForAdd, openLuckyCodeModalForEdit, saveLuckyCodeData) -> Implement similar to Tasks
-        // Template Modals (openTemplateModalForAdd, openTemplateModalForEdit, saveTemplateData) -> Implement similar to Tasks
+        function showAdminPanel() {
+            // No login check needed, just ensure DB connection before loading data
+            if (!db) {
+                console.error("Attempted to show admin panel without DB connection.");
+                // Error is already shown by initializeFirebaseAndPanel failure
+                return;
+            }
+            // Admin wrapper is already visible via CSS
+            loadDashboardStats(); // Load stats immediately
+            // Navigate to the default section (Dashboard)
+            const dashboardLink = document.querySelector('.sidebar-menu a[href="#dashboard"]');
+            showSection('dashboard', dashboardLink);
+        }
 
-        // --- Delete Operations (Task, User, LuckyCode, Template) ---
-        // deleteTask, deleteUser -> Keep from previous
-        // deleteLuckyCode, deleteTemplate -> Implement similar
+        // --- Navigation ---
+        function showSection(sectionId, clickedLinkElement) {
+             // No login check needed
+            if (!db) return; // Don't navigate if DB failed
 
-        // --- Config Save Operations ---
-        function saveDailyLuckyCode(event) { /* ... (read form, update dailyLuckyCodeRef) ... */ }
-        function saveAutopilotConfig(event) { /* ... (read form, update autopilotConfigRef) ... */ }
+            console.log(`Navigating to section: ${sectionId}`);
+            contentSections.forEach(section => section.classList.remove('active'));
+            const targetSection = document.getElementById(sectionId);
 
+            if (targetSection) {
+                targetSection.classList.add('active');
+            } else {
+                console.warn(`Section with ID "${sectionId}" not found. Falling back to dashboard.`);
+                document.getElementById('dashboard')?.classList.add('active');
+                sectionId = 'dashboard';
+            }
+
+            sidebarLinks.forEach(li => li.classList.remove('active'));
+            if (clickedLinkElement?.closest('li')) {
+                clickedLinkElement.closest('li').classList.add('active');
+            } else {
+                 // Fallback if called without a link element
+                document.querySelector(`.sidebar-menu a[href="#${sectionId}"]`)?.closest('li')?.classList.add('active');
+            }
+
+            // Load data for the activated section
+            const loadFunctions = {
+                'dashboard': loadDashboardStats,
+                'users': loadUsers,
+                'tasks': loadAdminTasks,
+                'luckycodes': loadLuckyCodes,
+                'templates': loadTemplates,
+                'autopilot': loadAutopilotConfig
+            };
+            if (loadFunctions[sectionId]) {
+                loadFunctions[sectionId]();
+            } else {
+                console.warn(`No load function defined for section: ${sectionId}`);
+            }
+
+            // Hide any open forms when switching sections
+            hideTaskForm();
+            hideLuckyCodeForm();
+            hideTemplateForm();
+        }
+
+        // --- Dashboard ---
+        // loadDashboardStats() function remains the same as the previous version
+
+        // --- User Management ---
+        // loadUsers(), renderUserRow(), handleBanUser(), handleUnbanUser(), handleDeleteUser() functions remain the same
+
+        // --- User Edit Modal Logic ---
+        // showEditUserForm(), handleUserEditSubmit() functions remain the same
+
+        // --- Send Message Modal Logic ---
+        // showSendMessageForm(), sendMessageTemplateSelect event listener, addSendMessageButtonRow(), removeButtonRow(), handleSendMessageSubmit() functions remain the same
+
+        // --- Task Management ---
+        // loadAdminTasks(), renderAdminTaskRow(), showAddTaskForm(), showEditTaskForm(), hideTaskForm(), toggleTaskFieldsVisibility(), handleTaskFormSubmit(), handleDeleteTask(), cacheAdminTasks() functions remain the same
+
+        // --- Lucky Code Management ---
+        // loadLuckyCodes(), renderLuckyCodeRow(), showAddLuckyCodeForm(), showEditLuckyCodeForm(), hideLuckyCodeForm(), handleLuckyCodeFormSubmit(), handleDeleteLuckyCode() functions remain the same
+
+        // --- Message Templates Management ---
+        // loadTemplates(), renderTemplateRow(), showAddTemplateForm(), showEditTemplateForm(), hideTemplateForm(), addTemplateButtonRow(), handleTemplateFormSubmit(), handleDeleteTemplate() functions remain the same
+
+        // --- Autopilot Configuration ---
+        // loadAutopilotConfig(), handleSaveRecurringTask(), handleSaveWelcomeMessage() functions remain the same
+
+        // --- Utility Functions ---
+        // formatAdminNumber(), escapeHtml(), showModal(), hideModal(), setStatusMessage(), populateDropdown(), populateTaskDropdown(), populateTemplateDropdown(), renderEmptyRow(), showFlashMessage() functions remain the same
+        // triggerShakeAnimation() can be removed as it was only used for login error.
 
         // --- Event Listeners ---
-        // Sidebar Navigation
-        sidebarMenuItems.forEach(item => { /* ... (same as previous) ... */ });
-        // Add Buttons
-        addTaskButton.addEventListener('click', openTaskModalForAdd);
-        addLuckyCodeButton.addEventListener('click', openLuckyCodeModalForAdd);
-        addTemplateButton.addEventListener('click', openTemplateModalForAdd);
-        // Modal Form Submissions
-        taskForm.addEventListener('submit', saveTaskData);
-        luckyCodeForm.addEventListener('submit', saveLuckyCodeData);
-        templateForm.addEventListener('submit', saveTemplateData);
-        // Config Form Submissions
-        dailyLuckyCodeForm.addEventListener('submit', saveDailyLuckyCode);
-        autopilotConfigForm.addEventListener('submit', saveAutopilotConfig);
-        // Modal Close Buttons & Backdrop Click -> Keep from previous
-
-        // --- Firebase Data Listeners ---
-        // Use Promise.all to wait for initial data for dashboard & config selects
-        let initialDataLoaded = false;
-        Promise.all([
-            tasksRef.once('value'),
-            usersRef.once('value'),
-            luckyCodesRef.once('value'),
-            templatesRef.once('value'),
-            dailyLuckyCodeRef.once('value'),
-            autopilotConfigRef.once('value')
-        ]).then(snapshots => {
-            const [tasksSnap, usersSnap, codesSnap, templatesSnap, dailyCodeSnap, autopilotSnap] = snapshots;
-
-            allTasksData = tasksSnap.val() || {};
-            allTemplatesData = templatesSnap.val() || {};
-
-            renderDashboardStats(usersSnap.val(), allTasksData, codesSnap.val(), allTemplatesData);
-            renderConfigForm(dailyCodeSnap.val(), autopilotSnap.val(), allTasksData, allTemplatesData);
-            renderTasksTable(allTasksData);
-            renderUsersTable(usersSnap.val());
-            renderLuckyCodesTable(codesSnap.val());
-            renderMessageTemplatesTable(allTemplatesData);
-
-            initialDataLoaded = true; // Mark initial load complete
-
-            // Attach persistent listeners AFTER initial load & rendering
-            attachPersistentListeners();
-
-        }).catch(error => {
-            console.error("Error fetching initial data:", error);
-             // Display error message to user
-             alert("Error loading initial admin data. Please check console and Firebase rules.");
-        });
-
-
-        function attachPersistentListeners() {
-            // Tasks Listener
-            tasksRef.on('value', (snapshot) => {
-                 if (!initialDataLoaded) return; // Prevent re-rendering during initial load phase
-                 console.log("Tasks data updated.");
-                 allTasksData = snapshot.val() || {};
-                 renderTasksTable(allTasksData);
-                 // Re-populate selects that depend on tasks if needed
-                 renderConfigForm(null, null, allTasksData, allTemplatesData); // Reuse cached template data
-                 // Update dashboard count potentially
-                 luckyCodesRef.once('value').then(codesSnap => templatesRef.once('value').then(templatesSnap => usersRef.once('value').then(usersSnap => {
-                     renderDashboardStats(usersSnap.val(), allTasksData, codesSnap.val(), templatesSnap.val());
-                 })));
-            }, (error) => { console.error("Tasks listener error:", error); });
-
-             // Users Listener
-             usersRef.on('value', (snapshot) => {
-                  if (!initialDataLoaded) return;
-                  console.log("Users data updated.");
-                  const usersData = snapshot.val();
-                  renderUsersTable(usersData);
-                  // Update dashboard count potentially
-                  tasksRef.once('value').then(tasksSnap => luckyCodesRef.once('value').then(codesSnap => templatesRef.once('value').then(templatesSnap => {
-                     renderDashboardStats(usersData, tasksSnap.val(), codesSnap.val(), templatesSnap.val());
-                 })));
-             }, (error) => { console.error("Users listener error:", error); });
-
-             // Lucky Codes Listener
-             luckyCodesRef.on('value', (snapshot) => {
-                 if (!initialDataLoaded) return;
-                 console.log("Lucky Codes data updated.");
-                 const codesData = snapshot.val();
-                 renderLuckyCodesTable(codesData);
-                  // Update dashboard count potentially
-                  tasksRef.once('value').then(tasksSnap => templatesRef.once('value').then(templatesSnap => usersRef.once('value').then(usersSnap => {
-                     renderDashboardStats(usersSnap.val(), tasksSnap.val(), codesData, templatesSnap.val());
-                 })));
-             }, (error) => { console.error("Lucky Codes listener error:", error); });
-
-            // Message Templates Listener
-            templatesRef.on('value', (snapshot) => {
-                 if (!initialDataLoaded) return;
-                 console.log("Templates data updated.");
-                 allTemplatesData = snapshot.val() || {};
-                 renderMessageTemplatesTable(allTemplatesData);
-                 // Re-populate selects that depend on templates if needed
-                 renderConfigForm(null, null, allTasksData, allTemplatesData); // Reuse cached task data
-                  // Update dashboard count potentially
-                  tasksRef.once('value').then(tasksSnap => luckyCodesRef.once('value').then(codesSnap => usersRef.once('value').then(usersSnap => {
-                     renderDashboardStats(usersSnap.val(), tasksSnap.val(), codesSnap.val(), allTemplatesData);
-                 })));
-            }, (error) => { console.error("Templates listener error:", error); });
-
-             // Config Listeners (less critical for table updates, just re-render form)
-             dailyLuckyCodeRef.on('value', (snapshot) => {
-                  if (!initialDataLoaded) return;
-                 renderConfigForm(snapshot.val(), null, allTasksData, allTemplatesData); // Only update relevant part
-             });
-             autopilotConfigRef.on('value', (snapshot) => {
-                  if (!initialDataLoaded) return;
-                 renderConfigForm(null, snapshot.val(), allTasksData, allTemplatesData); // Only update relevant part
-             });
+        function setupAdminEventListeners() {
+             // Login/Logout listeners REMOVED
+             taskForm.addEventListener('submit', handleTaskFormSubmit);
+             taskTypeSelect.addEventListener('change', toggleTaskFieldsVisibility); // Use helper function
+             luckyCodeForm.addEventListener('submit', handleLuckyCodeFormSubmit);
+             templateForm.addEventListener('submit', handleTemplateFormSubmit);
+             autopilotRecurringTaskForm.addEventListener('submit', handleSaveRecurringTask);
+             autopilotWelcomeMessageForm.addEventListener('submit', handleSaveWelcomeMessage);
+             userEditForm.addEventListener('submit', handleUserEditSubmit);
+             sendMessageForm.addEventListener('submit', handleSendMessageSubmit);
+            // Modal close listeners remain the same
+            document.querySelectorAll('.modal-overlay').forEach(modal => { modal.addEventListener('click', (event) => { if (event.target === modal) hideModal(modal.id); }); });
+            document.querySelectorAll('.modal-button.cancel').forEach(btn => { btn.addEventListener('click', (e) => { const modal = e.target.closest('.modal-overlay'); if (modal) hideModal(modal.id); }); });
+            console.log("Admin Event Listeners Setup (No Login).");
         }
 
-        // --- Initial Setup ---
-        // Find the initial active sidebar item and show its content
-        const initialActiveItem = document.querySelector('#sidebar-menu li.active');
-        const initialTargetId = initialActiveItem ? initialActiveItem.getAttribute('data-target') : 'dashboard-content'; // Default to dashboard
-        switchContent(initialTargetId || 'dashboard-content');
+        // Shake animation style REMOVED (or can be kept if needed elsewhere)
 
-         // --- FULL IMPLEMENTATION OF RENDER/MODAL/SAVE/DELETE FUNCTIONS ---
-         // (Requires filling in the commented-out sections above based on the previous examples and the new data structures)
-         // This part is extensive and involves replicating the pattern for each section.
+        // --- All other functions (Dashboard, User, Task, Code, Template, Autopilot, Modals, Utilities) remain the same as the previous version ---
+        // Ensure you copy them over from the previous code block I provided.
+        // I've omitted repeating them here for brevity, but they are necessary.
 
-         // --- switchContent (Copy from previous) ---
-         function switchContent(targetId) {
-             contentSections.forEach(section => {
-                 section.classList.remove('active');
-             });
-             sidebarMenuItems.forEach(item => {
-                  item.classList.remove('active');
-             });
+        // Re-include the actual implementation of all the data loading/rendering/handling functions here...
+        // (loadDashboardStats, loadUsers, renderUserRow, showEditUserForm, handleUserEditSubmit, etc...)
+        // ... COPY ALL FUNCTIONS FROM THE PREVIOUS VERSION HERE ...
+        // (Except the deleted login-related ones: checkLoginState, handleLogin, handleLogout, showLogin, triggerShakeAnimation)
 
-             const targetSection = document.getElementById(targetId);
-             const targetMenuItem = document.querySelector(`#sidebar-menu li[data-target="${targetId}"]`);
+        // --- Dashboard ---
+        function loadDashboardStats() {
+            if (!db) return;
+            console.log("Loading dashboard stats...");
+            statTotalUsers.textContent = '...'; statTotalCoins.textContent = '...';
+            statTotalTasks.textContent = '...'; statTotalRewards.textContent = '...';
+            statLuckyCodes.textContent = '...';
 
-             if (targetSection) {
-                 targetSection.classList.add('active');
-             } else {
-                 // Fallback if target not found
-                 document.getElementById('dashboard-content').classList.add('active');
-                 document.querySelector('#sidebar-menu li[data-target="dashboard-content"]').classList.add('active');
-             }
+            const refs = {
+                users: db.ref('users'),
+                tasks: db.ref('tasks'),
+                luckyCodes: db.ref('luckyCodes')
+            };
+            const now = Date.now();
 
-             if (targetMenuItem) {
-                 targetMenuItem.classList.add('active');
-                 // Update Breadcrumb
-                 const sectionName = targetMenuItem.querySelector('span').textContent;
-                 breadcrumb.innerHTML = `<a href="#"><i class="fas fa-home"></i> Home</a> / ${sectionName}`;
-             } else {
-                  // Fallback breadcrumb
-                  breadcrumb.innerHTML = `<a href="#"><i class="fas fa-home"></i> Home</a> / Dashboard`;
-             }
-         }
+            Promise.all([refs.users.once('value'), refs.tasks.once('value'), refs.luckyCodes.once('value')])
+            .then(([usersSnapshot, tasksSnapshot, luckyCodesSnapshot]) => {
+                let stats = { users: 0, coins: 0, tasks: 0, rewards: 0, codes: 0 };
 
-         // --- escapeHtml (Copy from previous) ---
-         function escapeHtml(unsafe) {
-              if (typeof unsafe !== 'string') {
-                  // Attempt to convert numbers or booleans to string, handle null/undefined
-                  if (unsafe === null || typeof unsafe === 'undefined') return '';
-                  if (typeof unsafe === 'number' || typeof unsafe === 'boolean') return String(unsafe);
-                  // If it's an object or array, indicate it rather than crashing
-                  if (typeof unsafe === 'object') return '[Object]';
-                  return unsafe; // Return other types as is (maybe unexpected)
-              }
-             return unsafe
-                  .replace(/&/g, "&")
-                  .replace(/</g, "<")
-                  .replace(/>/g, ">")
-                  .replace(/"/g, """)
-                  .replace(/'/g, "'");
-         }
+                if (usersSnapshot.exists()) {
+                    const usersData = usersSnapshot.val();
+                    stats.users = Object.keys(usersData).length;
+                    stats.coins = Object.values(usersData).reduce((sum, user) => sum + (user?.coins || 0), 0);
+                }
+                if (tasksSnapshot.exists()) {
+                    const tasksData = tasksSnapshot.val();
+                    // Count only *active* tasks for the dashboard stat
+                    stats.tasks = Object.values(tasksData).filter(task => task?.isActive === true).length;
+                    stats.rewards = Object.values(tasksData).reduce((sum, task) => sum + (task?.reward || 0), 0); // Total reward of ALL tasks
+                }
+                if (luckyCodesSnapshot.exists()) {
+                    stats.codes = Object.values(luckyCodesSnapshot.val()).filter(code => !code.expiryTimestamp || code.expiryTimestamp > now).length;
+                }
 
-        // --- Task Rendering ---
-        function renderTasksTable(tasksData) {
-            tasksTableBody.innerHTML = '';
-            if (!tasksData || Object.keys(tasksData).length === 0) {
-                tasksTableBody.innerHTML = '<tr class="loading-row"><td colspan="7">No tasks found.</td></tr>';
-                return;
-            }
-            const sortedTaskIds = Object.keys(tasksData).sort((a, b) => (tasksData[b].createdAt || 0) - (tasksData[a].createdAt || 0));
-
-            sortedTaskIds.forEach(taskId => {
-                const task = tasksData[taskId];
-                const row = document.createElement('tr');
-                row.dataset.id = taskId;
-                const activeBadge = task.isActive ? '<span class="badge badge-success">Yes</span>' : '<span class="badge badge-secondary">No</span>';
-                row.innerHTML = `
-                    <td>${escapeHtml(task.name || 'N/A')}</td>
-                    <td>${task.reward != null ? task.reward : 'N/A'}</td>
-                    <td>${escapeHtml(task.type || 'N/A')}</td>
-                    <td><a href="${escapeHtml(task.link || '#')}" target="_blank" class="link-text long-text" title="${escapeHtml(task.link || '')}">${escapeHtml(task.link || 'N/A')}</a></td>
-                    <td>${activeBadge}</td>
-                    <td>${formatTimestamp(task.createdAt)}</td>
-                    <td class="action-buttons">
-                        <button class="btn btn-warning btn-sm edit-task-button" title="Edit"><i class="fas fa-edit"></i></button>
-                        <button class="btn btn-danger btn-sm delete-task-button" title="Delete"><i class="fas fa-trash-alt"></i></button>
-                    </td>
-                `;
-                row.querySelector('.edit-task-button').addEventListener('click', () => openTaskModalForEdit(taskId, task));
-                row.querySelector('.delete-task-button').addEventListener('click', () => deleteTask(taskId, task.name));
-                tasksTableBody.appendChild(row);
+                statTotalUsers.textContent = formatAdminNumber(stats.users);
+                statTotalCoins.textContent = formatAdminNumber(stats.coins);
+                statTotalTasks.textContent = formatAdminNumber(stats.tasks); // Show active tasks count
+                statTotalRewards.textContent = formatAdminNumber(stats.rewards);
+                statLuckyCodes.textContent = formatAdminNumber(stats.codes);
+            })
+            .catch(error => {
+                console.error("Error loading dashboard stats:", error);
+                [statTotalUsers, statTotalCoins, statTotalTasks, statTotalRewards, statLuckyCodes].forEach(el => el.textContent = 'Error');
+                showFlashMessage("Error loading dashboard stats.", "error");
             });
         }
 
-         // --- User Rendering ---
-         function renderUsersTable(usersData) {
-             usersTableBody.innerHTML = '';
-             if (!usersData || Object.keys(usersData).length === 0) {
-                 usersTableBody.innerHTML = '<tr class="loading-row"><td colspan="7">No users found.</td></tr>';
-                 return;
-             }
-             // Sort by lastUpdate, newest first
-             const sortedUserIds = Object.keys(usersData).sort((a, b) => (usersData[b].lastUpdate || 0) - (usersData[a].lastUpdate || 0));
+        // --- User Management ---
+        function loadUsers() {
+            if (!db) return;
+            console.log("Loading users...");
+            setStatusMessage(userListStatus, 'Loading users...', false, false, true);
+            userTable.style.display = 'none';
+            userTableBody.innerHTML = '';
+            adminUsersCache = {};
 
-             sortedUserIds.forEach(userId => {
-                 const user = usersData[userId];
-                 const telegramInfo = user.telegramInfo || {};
-                 const row = document.createElement('tr');
-                 row.dataset.id = userId;
-                 const coins = user.coins != null ? parseFloat(user.coins).toFixed(2) : '0.00';
+            db.ref('users').orderByChild('lastUpdate').limitToLast(200).once('value')
+            .then(snapshot => {
+                adminUsersCache = snapshot.val() || {};
+                const userIds = Object.keys(adminUsersCache).sort((a, b) => (adminUsersCache[b].lastUpdate || 0) - (adminUsersCache[a].lastUpdate || 0)); // Sort newest first
+                let userCount = userIds.length;
 
-                 row.innerHTML = `
-                    <td>${escapeHtml(userId)}</td>
-                    <td>@${escapeHtml(telegramInfo.username || 'N/A')}</td>
-                    <td>${escapeHtml(telegramInfo.firstName || '')} ${escapeHtml(telegramInfo.lastName || '')}</td>
-                    <td>${coins}</td>
-                    <td><span class="long-text" title="${escapeHtml(user.tonWallet || '')}">${escapeHtml(user.tonWallet || 'Not Set')}</span></td>
-                    <td>${formatTimestamp(user.lastUpdate)}</td>
-                    <td class="action-buttons">
-                         <button class="btn btn-danger btn-sm delete-user-button" title="Delete User"><i class="fas fa-user-slash"></i></button>
-                         <!-- Add Edit button if implementing user edits -->
-                    </td>
-                 `;
-                  row.querySelector('.delete-user-button').addEventListener('click', () => deleteUser(userId, telegramInfo.username || userId));
-                  usersTableBody.appendChild(row);
-             });
-         }
-
-         // --- Lucky Code Rendering ---
-         function renderLuckyCodesTable(codesData) {
-             luckyCodesTableBody.innerHTML = '';
-             if (!codesData || Object.keys(codesData).length === 0) {
-                 luckyCodesTableBody.innerHTML = '<tr class="loading-row"><td colspan="5">No lucky codes found.</td></tr>';
-                 return;
-             }
-              const sortedCodeIds = Object.keys(codesData).sort((a, b) => (codesData[b].createdAt || 0) - (codesData[a].createdAt || 0));
-              const now = Date.now();
-
-             sortedCodeIds.forEach(codeId => {
-                 const code = codesData[codeId];
-                 const row = document.createElement('tr');
-                 row.dataset.id = codeId;
-                 const isExpired = code.expiryTimestamp < now;
-                 const statusBadge = isExpired
-                     ? '<span class="badge badge-secondary">Expired</span>'
-                     : '<span class="badge badge-success">Active</span>';
-
-                 row.innerHTML = `
-                     <td>${escapeHtml(code.code || 'N/A')}</td>
-                     <td>${code.reward != null ? code.reward : 'N/A'}</td>
-                     <td>${formatTimestamp(code.expiryTimestamp)}</td>
-                     <td>${statusBadge}</td>
-                     <td class="action-buttons">
-                         <button class="btn btn-warning btn-sm edit-luckycode-button" title="Edit"><i class="fas fa-edit"></i></button>
-                         <button class="btn btn-danger btn-sm delete-luckycode-button" title="Delete"><i class="fas fa-trash-alt"></i></button>
-                     </td>
-                 `;
-                 row.querySelector('.edit-luckycode-button').addEventListener('click', () => openLuckyCodeModalForEdit(codeId, code));
-                 row.querySelector('.delete-luckycode-button').addEventListener('click', () => deleteLuckyCode(codeId, code.code));
-                 luckyCodesTableBody.appendChild(row);
-             });
-         }
-
-         // --- Template Rendering ---
-        function renderMessageTemplatesTable(templatesData) {
-            templatesTableBody.innerHTML = '';
-            if (!templatesData || Object.keys(templatesData).length === 0) {
-                templatesTableBody.innerHTML = '<tr class="loading-row"><td colspan="5">No templates found.</td></tr>';
-                return;
-            }
-            const sortedTemplateIds = Object.keys(templatesData).sort((a, b) => (templatesData[b].createdAt || 0) - (templatesData[a].createdAt || 0));
-
-            sortedTemplateIds.forEach(templateId => {
-                const template = templatesData[templateId];
-                const row = document.createElement('tr');
-                row.dataset.id = templateId;
-                const imageLink = template.image ? `<a href="${escapeHtml(template.image)}" target="_blank" class="link-text">View</a>` : 'No';
-
-                row.innerHTML = `
-                    <td>${escapeHtml(template.name || 'N/A')}</td>
-                    <td><span class="long-text" title="${escapeHtml(template.text || '')}">${escapeHtml(template.text || 'N/A')}</span></td>
-                    <td>${imageLink}</td>
-                    <td>${formatTimestamp(template.createdAt)}</td>
-                    <td class="action-buttons">
-                        <button class="btn btn-warning btn-sm edit-template-button" title="Edit"><i class="fas fa-edit"></i></button>
-                        <button class="btn btn-danger btn-sm delete-template-button" title="Delete"><i class="fas fa-trash-alt"></i></button>
-                    </td>
-                `;
-                row.querySelector('.edit-template-button').addEventListener('click', () => openTemplateModalForEdit(templateId, template));
-                row.querySelector('.delete-template-button').addEventListener('click', () => deleteTemplate(templateId, template.name));
-                templatesTableBody.appendChild(row);
+                if (userCount > 0) {
+                    userIds.forEach(userId => renderUserRow(userId, adminUsersCache[userId]));
+                    userTable.style.display = 'table';
+                    setStatusMessage(userListStatus, userCount >= 200 ? 'Showing latest 200 users.' : '', false);
+                } else {
+                    renderEmptyRow(userTableBody, 8, "No users found."); // Colspan is now 8
+                    userTable.style.display = 'table';
+                    setStatusMessage(userListStatus, '', false);
+                }
+            })
+            .catch(error => {
+                console.error("Error loading users:", error);
+                setStatusMessage(userListStatus, 'Error loading users. Check console.', true);
+                userTable.style.display = 'none';
+                showFlashMessage("Failed to load users.", "error");
             });
         }
 
-         // --- Config Rendering ---
-        function renderConfigForm(dailyCode, autopilotConfig, tasks, templates) {
-             // Use cached data if specific data isn't passed (for updates from listeners)
-             dailyCode = dailyCode || (dailyLuckyCodeForm.dataset.cachedData ? JSON.parse(dailyLuckyCodeForm.dataset.cachedData) : null);
-             autopilotConfig = autopilotConfig || (autopilotConfigForm.dataset.cachedData ? JSON.parse(autopilotConfigForm.dataset.cachedData) : null);
-             tasks = tasks || allTasksData;
-             templates = templates || allTemplatesData;
+        function renderUserRow(userId, userData) {
+            const isBanned = userData?.isBanned === true;
+            const row = userTableBody.insertRow();
+            row.dataset.userId = userId;
 
-             // Cache data on form elements for potential partial updates
-             if(dailyCode) dailyLuckyCodeForm.dataset.cachedData = JSON.stringify(dailyCode);
-             if(autopilotConfig) autopilotConfigForm.dataset.cachedData = JSON.stringify(autopilotConfig);
+            let lastUpdateText = '<span class="text-muted">N/A</span>';
+            if (userData?.lastUpdate) {
+                try {
+                    lastUpdateText = new Date(userData.lastUpdate).toLocaleString();
+                } catch (e) { /* Ignore formatting error */ }
+            }
 
-             // Daily Lucky Code
-             if (dailyCode) {
-                 document.getElementById('config-daily-code').value = dailyCode.code || '';
-                 document.getElementById('config-daily-reward').value = dailyCode.reward || 0;
-             }
+            row.innerHTML = `
+                <td>${userId}</td>
+                <td>${userData.telegramInfo?.username ? ('@' + escapeHtml(userData.telegramInfo.username)) : '<span class="text-muted">N/A</span>'}</td>
+                <td>${escapeHtml(userData.telegramInfo?.firstName || '')} ${escapeHtml(userData.telegramInfo?.lastName || '') || '<span class="text-muted">No Name</span>'}</td>
+                <td>${formatAdminNumber(userData.coins || 0)}</td>
+                <td>${escapeHtml(userData.tonWallet) || '<span class="text-muted">Not Set</span>'}</td>
+                <td><span class="status-indicator ${isBanned ? 'status-banned' : 'status-active'}"></span>${isBanned ? 'Banned' : 'Active'}</td>
+                <td><small>${lastUpdateText}</small></td>
+                <td class="table-actions">
+                    <button class="btn btn-warning btn-xs" onclick="showEditUserForm('${userId}')" title="Edit User"><i class="material-icons">edit</i></button>
+                    <button class="btn btn-primary btn-xs" onclick="showSendMessageForm('${userId}')" title="Send Message"><i class="material-icons">message</i></button>
+                    ${isBanned ? `<button class="btn btn-success btn-xs" onclick="handleUnbanUser('${userId}')" title="Unban User"><i class="material-icons">lock_open</i></button>` : `<button class="btn btn-danger btn-xs" onclick="handleBanUser('${userId}')" title="Ban User"><i class="material-icons">block</i></button>`}
+                    <button class="btn btn-danger btn-xs" onclick="handleDeleteUser('${userId}')" title="DELETE User (Permanent!)"><i class="material-icons">delete_forever</i></button>
+                </td>
+            `;
+        }
+        function handleBanUser(userId) { if (!confirm(`Are you sure you want to BAN user ${userId}?`)) return; if (!db) return; db.ref(`users/${userId}/isBanned`).set(true).then(() => { console.log(`User ${userId} banned.`); loadUsers(); showFlashMessage(`User ${userId} banned successfully.`, 'success'); }).catch(error => { console.error("Ban error:", error); showFlashMessage(`Failed to ban user: ${error.message}`, "error"); }); }
+        function handleUnbanUser(userId) { if (!confirm(`Are you sure you want to UNBAN user ${userId}?`)) return; if (!db) return; db.ref(`users/${userId}/isBanned`).set(null).then(() => { console.log(`User ${userId} unbanned.`); loadUsers(); showFlashMessage(`User ${userId} unbanned successfully.`, 'success'); }).catch(error => { console.error("Unban error:", error); showFlashMessage(`Failed to unban user: ${error.message}`, "error"); }); }
+        function handleDeleteUser(userId) { if (!confirm(`DELETE USER ${userId}?\n\nThis action is PERMANENT and cannot be undone!`)) return; if (!confirm(`FINAL WARNING: Really delete user ${userId} and all their data? There is no going back!`)) return; if (!db) return; db.ref(`users/${userId}`).remove().then(() => { console.log(`User ${userId} DELETED.`); delete adminUsersCache[userId]; loadUsers(); showFlashMessage(`User ${userId} permanently deleted.`, 'success'); }).catch(error => { console.error("Delete user error:", error); showFlashMessage(`Failed to delete user ${userId}. Error: ${error.message}`, "error"); }); }
 
-             // Autopilot Config
-             if (autopilotConfig) {
-                 document.getElementById('config-welcome-delay').value = autopilotConfig.welcomeMessage?.delayMilliseconds || 0;
-                 populateSelectWithOptions(configWelcomeTemplateSelect, templates, autopilotConfig.welcomeMessage?.templateId, 'Select Welcome Template');
-                 populateSelectWithOptions(configRecurringTaskSelect, tasks, autopilotConfig.recurringTask?.taskId, 'Select Recurring Task');
-             } else {
-                 // Ensure selects are populated even if autopilotConfig is null initially
-                  populateSelectWithOptions(configWelcomeTemplateSelect, templates, null, 'Select Welcome Template');
-                  populateSelectWithOptions(configRecurringTaskSelect, tasks, null, 'Select Recurring Task');
-             }
-         }
+        // --- User Edit Modal Logic ---
+        function showEditUserForm(userId) { const userData = adminUsersCache[userId]; if (!userData) { showFlashMessage("User data not found in cache. Please refresh user list.", "error"); return; } editUserIdInput.value = userId; editUserIdDisplay.textContent = userId; editUserUsername.textContent = userData.telegramInfo?.username ? '@' + escapeHtml(userData.telegramInfo.username) : 'N/A'; editUserFullname.textContent = `${escapeHtml(userData.telegramInfo?.firstName || '')} ${escapeHtml(userData.telegramInfo?.lastName || '')}`.trim() || 'N/A'; editUserCoinsInput.value = userData.coins || 0; editUserTonWalletInput.value = userData.tonWallet || ''; editUserBanStatusSelect.value = userData.isBanned === true ? 'true' : 'false'; setStatusMessage(userEditStatus, '', false); showModal('user-edit-modal'); }
+        function handleUserEditSubmit(event) {
+            event.preventDefault();
+            if (!db) return;
+            const userId = editUserIdInput.value;
+            if (!userId) { setStatusMessage(userEditStatus, 'Error: User ID missing.', true); return; }
+            const coins = parseInt(editUserCoinsInput.value);
+            if (isNaN(coins) || coins < 0) { setStatusMessage(userEditStatus, 'Invalid coin amount. Must be a non-negative number.', true); editUserCoinsInput.focus(); return; }
+            const tonWallet = editUserTonWalletInput.value.trim();
+            const updates = {
+                coins: coins,
+                tonWallet: tonWallet || null,
+                isBanned: editUserBanStatusSelect.value === 'true' ? true : null,
+                lastUpdate: firebase.database.ServerValue.TIMESTAMP // Update timestamp on edit
+            };
+            setStatusMessage(userEditStatus, 'Saving...', false, false, true);
+            db.ref(`users/${userId}`).update(updates).then(() => {
+                setStatusMessage(userEditStatus, 'User updated successfully!', false, true);
+                if(adminUsersCache[userId]) {
+                    adminUsersCache[userId] = { ...adminUsersCache[userId], ...updates };
+                    if (updates.isBanned === null) delete adminUsersCache[userId].isBanned;
+                    adminUsersCache[userId].lastUpdate = Date.now();
+                }
+                loadUsers();
+                setTimeout(() => hideModal('user-edit-modal'), 1500);
+            }).catch(error => {
+                console.error("Error updating user:", error);
+                setStatusMessage(userEditStatus, `Save Error: ${error.message}`, true);
+            });
+        }
 
-         // --- TASK MODAL/SAVE/DELETE (Mostly from previous) ---
-         function openTaskModalForAdd() { /* ... Copy ... */ }
-         function openTaskModalForEdit(taskId, taskData) { /* ... Copy ... */ }
-         function saveTaskData(event) { /* ... Copy ... */ }
-         function deleteTask(taskId, taskName) { /* ... Copy ... */ }
+        // --- Send Message Modal Logic ---
+        function showSendMessageForm(userId) { if (!adminTemplatesCache || Object.keys(adminTemplatesCache).length === 0) loadTemplates(true); else populateTemplateDropdown(sendMessageTemplateSelect, adminTemplatesCache, '-- Manual Message --'); sendMessageUserIdInput.value = userId; sendMessageUserIdDisplay.textContent = userId; sendMessageTemplateSelect.value = ""; sendMessageForm.reset(); sendMessageButtonsContainer.innerHTML = ''; sendMessageButtonsPlaceholder.style.display = 'block'; sendMessageUserIdInput.value = userId; sendMessageUserIdDisplay.textContent = userId; setStatusMessage(sendMessageStatus, '', false); showModal('send-message-modal'); }
+        sendMessageTemplateSelect?.addEventListener('change', (event) => { const templateId = event.target.value; const templateData = adminTemplatesCache[templateId]; sendMessageForm.reset(); sendMessageButtonsContainer.innerHTML = ''; sendMessageButtonsPlaceholder.style.display = 'block'; if (templateData) { sendMessageTextInput.value = templateData.text || ''; sendMessageImageInput.value = templateData.image || ''; if (templateData.buttons && Array.isArray(templateData.buttons)) { sendMessageButtonsPlaceholder.style.display = 'none'; templateData.buttons.forEach((buttonRow) => { if (Array.isArray(buttonRow) && buttonRow.length > 0) addSendMessageButtonRow(buttonRow[0].text, buttonRow[0].url); }); } } sendMessageUserIdInput.value = sendMessageModal.querySelector('#send-message-user-id-display').textContent; });
+        function addSendMessageButtonRow(labelText = '', urlText = '') { if (sendMessageButtonsContainer.children.length >= 5) { showFlashMessage("Maximum of 5 button rows allowed.", "warning"); return; } sendMessageButtonsPlaceholder.style.display = 'none'; const div = document.createElement('div'); div.className = 'inline-button-row'; div.innerHTML = ` <input type="text" class="form-control message-button-label" placeholder="Button Label" value="${escapeHtml(labelText)}" required> <input type="url" class="form-control message-button-url" placeholder="Button URL (https://...)" value="${escapeHtml(urlText)}" required> <button type="button" class="btn btn-danger btn-xs" onclick="removeButtonRow(this, 'send-message-buttons-placeholder')" title="Remove Row"><i class="material-icons">remove_circle_outline</i></button> `; sendMessageButtonsContainer.appendChild(div); }
+        function removeButtonRow(buttonElement, placeholderId) { const row = buttonElement.closest('.inline-button-row'); const container = row.parentElement; row.remove(); if (container.children.length === 0) { const placeholder = document.getElementById(placeholderId); if (placeholder) placeholder.style.display = 'block'; } }
+        async function handleSendMessageSubmit(event) { event.preventDefault(); if (!BOT_TOKEN) { setStatusMessage(sendMessageStatus, 'CRITICAL: Bot Token is missing or empty. Cannot send.', true); console.error("CRITICAL SECURITY RISK: BOT_TOKEN is missing or empty!"); return; } if (!db) { setStatusMessage(sendMessageStatus, 'Error: Database connection lost.', true); return; } const chatId = sendMessageUserIdInput.value; const templateId = sendMessageTemplateSelect.value; let text = sendMessageTextInput.value.trim(); let imageUrl = sendMessageImageInput.value.trim(); let buttons = []; let buttonsValid = true; const buttonRows = sendMessageButtonsContainer.querySelectorAll('.inline-button-row'); buttonRows.forEach(row => { const labelInput = row.querySelector('.message-button-label'); const urlInput = row.querySelector('.message-button-url'); const label = labelInput?.value.trim(); const url = urlInput?.value.trim(); if (label && url) { try { new URL(url); buttons.push([{ text: label, url: url }]); } catch (_) { buttonsValid = false; urlInput?.focus(); } } else if (label || url) { buttonsValid = false; if (!label) labelInput?.focus(); else urlInput?.focus(); } }); if (!buttonsValid) { setStatusMessage(sendMessageStatus, 'Error: Incomplete or invalid button label/URL.', true); return; } if (templateId && adminTemplatesCache[templateId]) { const templateData = adminTemplatesCache[templateId]; text = templateData.text || ''; imageUrl = templateData.image || ''; buttons = templateData.buttons || []; } if (!chatId || (!text && !imageUrl)) { setStatusMessage(sendMessageStatus, 'Error: User ID and Message Text or Image URL required.', true); return; } setStatusMessage(sendMessageStatus, 'Sending (INSECURE CLIENT-SIDE)...', false, false, true); try { const payload = { chat_id: chatId, parse_mode: 'HTML', disable_web_page_preview: false }; let apiUrl = `https://api.telegram.org/bot${BOT_TOKEN}/`; let method = ''; if (imageUrl) { method = 'sendPhoto'; payload.photo = imageUrl; if (text) payload.caption = text; } else if (text) { method = 'sendMessage'; payload.text = text; } else { throw new Error("No text or image provided."); } apiUrl += method; if (buttons && buttons.length > 0) payload.reply_markup = JSON.stringify({ inline_keyboard: buttons }); const response = await fetch(apiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) }); const result = await response.json(); if (!response.ok || !result.ok) throw new Error(result.description || `Telegram API Error: ${response.status}`); console.log("Message sent (INSECURELY):", result); setStatusMessage(sendMessageStatus, 'Message sent successfully!', false, true); setTimeout(() => hideModal('send-message-modal'), 1500); } catch (error) { console.error("Error sending Telegram message (INSECURE):", error); setStatusMessage(sendMessageStatus, `Send Error: ${error.message}`, true); } }
 
-         // --- USER DELETE (Copy from previous) ---
-         function deleteUser(userId, userName) { /* ... Copy ... */ }
+        // --- Task Management ---
+        function loadAdminTasks(isDependency = false) {
+            if (!db) return;
+            if (!isDependency) {
+                console.log("Loading admin tasks...");
+                setStatusMessage(taskListStatus, 'Loading tasks...', false, false, true);
+                taskTable.style.display = 'none';
+                taskTableBody.innerHTML = '';
+            }
+            db.ref('tasks').orderByChild('name').once('value').then(snapshot => {
+                cacheAdminTasks(snapshot.val());
+                if (!isDependency) {
+                    const tasksData = adminTasksCache;
+                    let count = 0;
+                    if (tasksData && Object.keys(tasksData).length > 0) {
+                        Object.keys(tasksData).forEach(taskId => { // Already sorted by name from query
+                            renderAdminTaskRow(taskId, tasksData[taskId]); count++;
+                        });
+                        taskTable.style.display = 'table'; setStatusMessage(taskListStatus, '', false);
+                    } else {
+                        renderEmptyRow(taskTableBody, 7, "No tasks found. Add one using the button above."); // Colspan now 7
+                        taskTable.style.display = 'table'; setStatusMessage(taskListStatus, '', false);
+                    }
+                }
+                if (isDependency || document.getElementById('autopilot')?.classList.contains('active')) {
+                    populateTaskDropdown(autopilotTaskSelect, adminTasksCache, '-- None (Disable Recurring Task) --');
+                    if (adminAutopilotConfigCache?.recurringTask?.taskId) autopilotTaskSelect.value = adminAutopilotConfigCache.recurringTask.taskId;
+                }
+                loadDashboardStats();
+            }).catch(error => {
+                console.error("Error loading admin tasks:", error);
+                cacheAdminTasks({});
+                if (!isDependency) {
+                    setStatusMessage(taskListStatus, 'Error loading tasks. Check console.', true);
+                    renderEmptyRow(taskTableBody, 7, "Error loading tasks.");
+                    taskTable.style.display = 'table';
+                }
+            });
+        }
 
-         // --- LUCKY CODE MODAL/SAVE/DELETE ---
-         function openLuckyCodeModalForAdd() {
-             currentEditLuckyCodeId = null;
-             luckyCodeForm.reset();
-             document.getElementById('luckycode-modal-id').value = '';
-             document.getElementById('luckycode-modal-title').textContent = 'Add Lucky Code';
-             document.getElementById('luckycode-modal-save-button').textContent = 'Save Code';
-             showModal(luckyCodeModal);
-         }
-         function openLuckyCodeModalForEdit(codeId, codeData) {
-              currentEditLuckyCodeId = codeId;
-              luckyCodeForm.reset();
-              document.getElementById('luckycode-modal-id').value = codeId;
-              document.getElementById('luckycode-modal-title').textContent = `Edit Code: ${codeData.code || codeId}`;
-              document.getElementById('luckycode-modal-code').value = codeData.code || '';
-              document.getElementById('luckycode-modal-reward').value = codeData.reward || 0;
-              document.getElementById('luckycode-modal-expiry').value = formatDateTimeForInput(codeData.expiryTimestamp);
-              document.getElementById('luckycode-modal-save-button').textContent = 'Update Code';
-              showModal(luckyCodeModal);
-         }
-          function saveLuckyCodeData(event) {
-              event.preventDefault();
-              const code = document.getElementById('luckycode-modal-code').value.trim();
-              const reward = parseInt(document.getElementById('luckycode-modal-reward').value) || 0;
-              const expiryStr = document.getElementById('luckycode-modal-expiry').value;
-              const expiryTimestamp = parseDateTimeInput(expiryStr);
+        function renderAdminTaskRow(taskId, taskData) {
+            const row = taskTableBody.insertRow();
+            row.dataset.taskId = taskId;
+            const isActive = taskData?.isActive === true;
+            const type = taskData?.type || 'link';
 
-              if (!code || reward < 0 || !expiryTimestamp) {
-                  alert('Please fill Code, non-negative Reward, and valid Expiry Date.');
-                  return;
-              }
+            const linkDisplay = taskData.link ? `<a href="${escapeHtml(taskData.link)}" target="_blank" title="${escapeHtml(taskData.link)}">${escapeHtml(taskData.link).substring(0, 30)}...</a>` : '<span class="text-muted">N/A</span>';
 
-              const codeData = {
-                  code: code,
-                  reward: reward,
-                  expiryTimestamp: expiryTimestamp,
-                  updatedAt: firebase.database.ServerValue.TIMESTAMP
-              };
+            let codeOrTimeDisplay = '<span class="text-muted">N/A</span>';
+            if (type === 'code' && taskData.code) {
+                codeOrTimeDisplay = `<code>${escapeHtml(taskData.code)}</code>`;
+            } else if (type === 'link' && typeof taskData.verificationTime === 'number') {
+                codeOrTimeDisplay = `${taskData.verificationTime} sec`;
+            }
 
-              let promise;
-              if (currentEditLuckyCodeId) {
-                  promise = luckyCodesRef.child(currentEditLuckyCodeId).update(codeData);
-              } else {
-                  codeData.createdAt = firebase.database.ServerValue.TIMESTAMP;
-                  promise = luckyCodesRef.push(codeData);
-              }
+            row.innerHTML = `
+                <td>
+                    <img src="${escapeHtml(taskData.imageUrl) || 'https://via.placeholder.com/30x30?text=N/A'}" alt="Icon">
+                    <span class="text-bold">${escapeHtml(taskData.name || 'Untitled Task')}</span>
+                    ${taskData.description ? `<br><small class="text-muted">${escapeHtml(taskData.description)}</small>` : ''}
+                </td>
+                <td><span class="label bg-${type === 'code' ? 'purple' : 'blue'}">${escapeHtml(type)}</span></td>
+                <td><span class="status-indicator ${isActive ? 'status-active' : 'status-inactive'}"></span>${isActive ? 'Active' : 'Inactive'}</td>
+                <td>${formatAdminNumber(taskData.reward || 0)} <i class="material-icons" style="font-size:1em; color:var(--box-yellow); vertical-align:middle;">monetization_on</i></td>
+                <td>${linkDisplay}</td>
+                <td>${codeOrTimeDisplay}</td>
+                <td class="table-actions">
+                    <button class="btn btn-warning btn-xs" onclick="showEditTaskForm('${taskId}')" title="Edit Task"><i class="material-icons">edit</i></button>
+                    <button class="btn btn-danger btn-xs" onclick="handleDeleteTask('${taskId}')" title="Delete Task"><i class="material-icons">delete</i></button>
+                </td>
+            `;
+        }
 
-              promise.then(() => { hideModal(luckyCodeModal); }).catch(error => { alert(`Error saving code: ${error.message}`); console.error(error); });
-          }
-          function deleteLuckyCode(codeId, codeName) {
-             if (confirm(`Delete lucky code "${codeName || codeId}"?`)) {
-                 luckyCodesRef.child(codeId).remove()
-                    .then(() => console.log("Code deleted."))
-                    .catch(error => { alert(`Error deleting code: ${error.message}`); console.error(error); });
-             }
-         }
+        function showAddTaskForm() { taskFormBox.style.display = 'block'; taskFormTitle.textContent = 'Add New Task'; taskForm.reset(); taskEditIdInput.value = ''; taskIsActiveSelect.value = 'true'; taskTypeSelect.value = 'link'; toggleTaskFieldsVisibility(); setStatusMessage(taskFormError, '', false); taskFormBox.scrollIntoView({ behavior: 'smooth', block: 'start' }); taskNameInput.focus(); }
+        function showEditTaskForm(taskId) { const taskData = adminTasksCache[taskId]; if (!taskData) { showFlashMessage("Task data not found. Please refresh.", "error"); return; } taskFormBox.style.display = 'block'; taskFormTitle.textContent = 'Edit Task'; taskForm.reset(); taskEditIdInput.value = taskId; taskNameInput.value = taskData.name || ''; taskDescriptionInput.value = taskData.description || ''; taskImageUrlInput.value = taskData.imageUrl || ''; taskRewardInput.value = taskData.reward || 0; taskLinkInput.value = taskData.link || ''; taskTypeSelect.value = taskData.type || 'link'; taskCodeInput.value = taskData.code || ''; taskVerificationTimeInput.value = typeof taskData.verificationTime === 'number' ? taskData.verificationTime : 10; taskIsActiveSelect.value = taskData.isActive === true ? 'true' : 'false'; setStatusMessage(taskFormError, '', false); toggleTaskFieldsVisibility(); taskFormBox.scrollIntoView({ behavior: 'smooth', block: 'start' }); taskNameInput.focus(); }
+        function hideTaskForm() { taskFormBox.style.display = 'none'; taskForm.reset(); taskEditIdInput.value = ''; setStatusMessage(taskFormError, '', false); }
 
+        function toggleTaskFieldsVisibility() {
+             const type = taskTypeSelect.value;
+             taskCodeGroup.style.display = (type === 'code') ? 'block' : 'none';
+             taskVerificationTimeGroup.style.display = (type === 'link') ? 'block' : 'none';
+        }
 
-         // --- TEMPLATE MODAL/SAVE/DELETE ---
-         function openTemplateModalForAdd() {
-             currentEditTemplateId = null;
-             templateForm.reset();
-             document.getElementById('template-modal-id').value = '';
-             document.getElementById('template-modal-title').textContent = 'Add Message Template';
-             document.getElementById('template-modal-save-button').textContent = 'Save Template';
-             showModal(templateModal);
-         }
-          function openTemplateModalForEdit(templateId, templateData) {
-              currentEditTemplateId = templateId;
-              templateForm.reset();
-              document.getElementById('template-modal-id').value = templateId;
-              document.getElementById('template-modal-title').textContent = `Edit Template: ${templateData.name || templateId}`;
-              document.getElementById('template-modal-name').value = templateData.name || '';
-              document.getElementById('template-modal-text').value = templateData.text || '';
-              document.getElementById('template-modal-image').value = templateData.image || ''; // Use image, not imageUrl
-              document.getElementById('template-modal-save-button').textContent = 'Update Template';
-              showModal(templateModal);
-         }
-         function saveTemplateData(event) {
-             event.preventDefault();
-             const name = document.getElementById('template-modal-name').value.trim();
-             const text = document.getElementById('template-modal-text').value.trim();
-             const image = document.getElementById('template-modal-image').value.trim();
+        function handleTaskFormSubmit(event) {
+            event.preventDefault();
+            if (!db) return;
+            setStatusMessage(taskFormError, '', false);
 
-             if (!name || !text) { alert('Template Name and Text are required.'); return; }
+            const taskId = taskEditIdInput.value;
+            const name = taskNameInput.value.trim();
+            const reward = parseInt(taskRewardInput.value);
+            const type = taskTypeSelect.value;
+            const code = taskCodeInput.value.trim();
+            const verificationTime = parseInt(taskVerificationTimeInput.value);
+            const isActive = taskIsActiveSelect.value === 'true';
+            const link = taskLinkInput.value.trim();
+            const imageUrl = taskImageUrlInput.value.trim();
 
-             const templateData = { name, text, image, updatedAt: firebase.database.ServerValue.TIMESTAMP };
+            // Validation
+            if (!name) { setStatusMessage(taskFormError, "Task Name is required.", true); taskNameInput.focus(); return; }
+            if (isNaN(reward) || reward < 0) { setStatusMessage(taskFormError, "Reward must be a non-negative number.", true); taskRewardInput.focus(); return; }
+            if (!link) { setStatusMessage(taskFormError, "Task URL / Link is required.", true); taskLinkInput.focus(); return; }
+            try { new URL(link); } catch (_) { setStatusMessage(taskFormError, "Task URL / Link is invalid.", true); taskLinkInput.focus(); return; }
+            if (type === 'code' && !code) { setStatusMessage(taskFormError, "Verification Code is required for Code type tasks.", true); taskCodeInput.focus(); return; }
+            if (type === 'link' && (isNaN(verificationTime) || verificationTime < 0)) { setStatusMessage(taskFormError, "Verification Time must be a non-negative number for Link tasks.", true); taskVerificationTimeInput.focus(); return; }
+            try { if (imageUrl) new URL(imageUrl); } catch (_) { setStatusMessage(taskFormError, "Image URL is invalid.", true); taskImageUrlInput.focus(); return; }
 
-             let promise;
-             if (currentEditTemplateId) {
-                 promise = templatesRef.child(currentEditTemplateId).update(templateData);
-             } else {
-                  templateData.createdAt = firebase.database.ServerValue.TIMESTAMP;
-                 promise = templatesRef.push(templateData);
-             }
-             promise.then(() => { hideModal(templateModal); }).catch(error => { alert(`Error saving template: ${error.message}`); console.error(error); });
-         }
-          function deleteTemplate(templateId, templateName) {
-             if (confirm(`Delete template "${templateName || templateId}"?`)) {
-                 templatesRef.child(templateId).remove()
-                    .then(() => console.log("Template deleted."))
-                    .catch(error => { alert(`Error deleting template: ${error.message}`); console.error(error); });
-             }
-         }
+            const taskData = {
+                name: name,
+                description: taskDescriptionInput.value.trim() || null,
+                imageUrl: imageUrl || null,
+                reward: reward,
+                link: link,
+                type: type,
+                isActive: isActive,
+                code: (type === 'code' && code) ? code : null,
+                verificationTime: (type === 'link' && !isNaN(verificationTime)) ? verificationTime : null,
+                createdAt: taskId ? (adminTasksCache[taskId]?.createdAt || firebase.database.ServerValue.TIMESTAMP) : firebase.database.ServerValue.TIMESTAMP,
+                updatedAt: firebase.database.ServerValue.TIMESTAMP
+            };
 
-         // --- CONFIG SAVE ---
-         function saveDailyLuckyCode(event) {
-             event.preventDefault();
-             const code = document.getElementById('config-daily-code').value.trim();
-             const reward = parseInt(document.getElementById('config-daily-reward').value) || 0;
-             if (!code || reward < 0) { alert('Daily Code and non-negative Reward required.'); return; }
-             dailyLuckyCodeRef.set({ code, reward })
-                 .then(() => alert('Daily Lucky Code saved!'))
-                 .catch(error => { alert(`Error saving daily code: ${error.message}`); console.error(error); });
-         }
-          function saveAutopilotConfig(event) {
-              event.preventDefault();
-              const welcomeDelay = parseInt(document.getElementById('config-welcome-delay').value) || 0;
-              const welcomeTemplateId = document.getElementById('config-welcome-template').value;
-              const recurringTaskId = document.getElementById('config-recurring-task').value;
+             Object.keys(taskData).forEach(key => { if (taskData[key] === null) { delete taskData[key]; } });
 
-              const configData = {
-                  welcomeMessage: {
-                      delayMilliseconds: welcomeDelay,
-                      templateId: welcomeTemplateId || null, // Store null if not selected
-                      updatedAt: firebase.database.ServerValue.TIMESTAMP
-                  },
-                  recurringTask: {
-                      taskId: recurringTaskId || null, // Store null if not selected
-                      updatedAt: firebase.database.ServerValue.TIMESTAMP
-                  }
-              };
-               autopilotConfigRef.set(configData)
-                 .then(() => alert('Autopilot Configuration saved!'))
-                 .catch(error => { alert(`Error saving autopilot config: ${error.message}`); console.error(error); });
-          }
+            setStatusMessage(taskFormError, 'Saving...', false, false, true);
+            const taskRef = taskId ? db.ref(`tasks/${taskId}`) : db.ref('tasks').push();
 
+            taskRef.set(taskData)
+            .then(() => {
+                console.log(`Task ${taskId ? 'updated' : 'added'}: ${taskRef.key}`);
+                adminTasksCache[taskRef.key] = { ...taskData, createdAt: taskData.createdAt || Date.now(), updatedAt: Date.now() };
+                hideTaskForm();
+                loadAdminTasks();
+                showFlashMessage(`Task "${name}" ${taskId ? 'updated' : 'saved'} successfully.`, 'success');
+            })
+            .catch(error => {
+                console.error("Error saving task:", error);
+                setStatusMessage(taskFormError, `Save Error: ${error.message}`, true);
+            });
+        }
 
-         // --- Re-populate necessary functions copied from previous example ---
-         // Make sure the definitions for the functions called above
-         // (like openTaskModalForAdd, saveTaskData, deleteTask, deleteUser, etc.)
-         // are present in the script block. Copy them from the previous responses if needed.
+        function handleDeleteTask(taskId) { const taskName = adminTasksCache[taskId]?.name || taskId; if (!confirm(`DELETE TASK "${taskName}"?\n\nThis action cannot be undone!`)) return; if (!confirm(`FINAL WARNING: Really delete task "${taskName}"?`)) return; if (!db) return; db.ref(`tasks/${taskId}`).remove().then(() => { console.log(`Task ${taskId} deleted.`); delete adminTasksCache[taskId]; loadAdminTasks(); showFlashMessage(`Task "${taskName}" deleted successfully.`, 'success'); }).catch(error => { console.error("Error deleting task:", error); showFlashMessage(`Failed to delete task. Error: ${error.message}`, "error"); }); }
+        function cacheAdminTasks(tasksData) { adminTasksCache = tasksData || {}; }
+
+        // --- Lucky Code Management ---
+        function loadLuckyCodes() { if (!db) return; console.log("Loading lucky codes..."); setStatusMessage(luckyCodeListStatus, 'Loading lucky codes...', false, false, true); luckyCodeTable.style.display = 'none'; luckyCodeTableBody.innerHTML = ''; adminLuckyCodesCache = {}; db.ref('luckyCodes').orderByChild('createdAt').once('value').then(snapshot => { adminLuckyCodesCache = snapshot.val() || {}; const codesData = adminLuckyCodesCache; let count = 0; if (codesData && Object.keys(codesData).length > 0) { Object.keys(codesData).reverse().forEach(codeId => { renderLuckyCodeRow(codeId, codesData[codeId]); count++; }); luckyCodeTable.style.display = 'table'; setStatusMessage(luckyCodeListStatus, '', false); } else { renderEmptyRow(luckyCodeTableBody, 5, "No lucky codes found."); luckyCodeTable.style.display = 'table'; setStatusMessage(luckyCodeListStatus, '', false); } loadDashboardStats(); }).catch(error => { console.error("Error loading lucky codes:", error); setStatusMessage(luckyCodeListStatus, 'Error loading lucky codes. Check console.', true); adminLuckyCodesCache = {}; renderEmptyRow(luckyCodeTableBody, 5, "Error loading lucky codes."); luckyCodeTable.style.display = 'table'; }); }
+        function renderLuckyCodeRow(codeId, codeData) { const row = luckyCodeTableBody.insertRow(); row.dataset.codeId = codeId; const now = Date.now(); let expiryText = '<span class="text-muted">Never</span>'; let statusText = 'Active'; let statusClass = 'status-active'; let isExpired = false; if (codeData.expiryTimestamp) { const expiryDate = new Date(codeData.expiryTimestamp); expiryText = expiryDate.toLocaleString(); if (codeData.expiryTimestamp < now) { isExpired = true; statusText = 'Expired'; statusClass = 'status-expired'; row.classList.add('dimmed'); } } row.innerHTML = ` <td><code>${escapeHtml(codeData.code || 'ERROR')}</code></td> <td>${formatAdminNumber(codeData.reward || 0)} <i class="material-icons" style="font-size:1em; color:var(--box-yellow); vertical-align:middle;">monetization_on</i></td> <td>${expiryText}</td> <td><span class="status-indicator ${statusClass}"></span>${statusText}</td> <td class="table-actions"> <button class="btn btn-warning btn-xs" onclick="showEditLuckyCodeForm('${codeId}')" title="Edit Code"${isExpired ? ' disabled' : ''}><i class="material-icons">edit</i></button> <button class="btn btn-danger btn-xs" onclick="handleDeleteLuckyCode('${codeId}')" title="Delete Code"><i class="material-icons">delete</i></button> </td> `; }
+        function showAddLuckyCodeForm() { luckyCodeFormBox.style.display = 'block'; luckyCodeFormTitle.textContent = 'Add New Lucky Code'; luckyCodeForm.reset(); luckyCodeEditIdInput.value = ''; setStatusMessage(luckyCodeFormError, '', false); luckyCodeCodeInput.disabled = false; luckyCodeFormBox.scrollIntoView({ behavior: 'smooth', block: 'start' }); luckyCodeCodeInput.focus(); }
+        function showEditLuckyCodeForm(codeId) { const codeData = adminLuckyCodesCache[codeId]; if (!codeData) { showFlashMessage("Code data not found. Please refresh.", "error"); return; } luckyCodeFormBox.style.display = 'block'; luckyCodeFormTitle.textContent = 'Edit Lucky Code'; luckyCodeForm.reset(); luckyCodeEditIdInput.value = codeId; luckyCodeCodeInput.value = codeData.code || ''; luckyCodeRewardInput.value = codeData.reward || 0; setStatusMessage(luckyCodeFormError, '', false); luckyCodeCodeInput.disabled = true; luckyCodeExpiryInput.value = ''; if (codeData.expiryTimestamp) { try { const dt = new Date(codeData.expiryTimestamp); const timezoneOffset = dt.getTimezoneOffset() * 60000; const localISOTime = new Date(dt.getTime() - timezoneOffset).toISOString().slice(0, 16); luckyCodeExpiryInput.value = localISOTime; } catch (e) { console.error("Error parsing expiry timestamp for input:", e); } } luckyCodeFormBox.scrollIntoView({ behavior: 'smooth', block: 'start' }); luckyCodeRewardInput.focus(); }
+        function hideLuckyCodeForm() { luckyCodeFormBox.style.display = 'none'; luckyCodeForm.reset(); luckyCodeEditIdInput.value = ''; setStatusMessage(luckyCodeFormError, '', false); luckyCodeCodeInput.disabled = false; }
+        function handleLuckyCodeFormSubmit(event) { event.preventDefault(); if (!db) return; setStatusMessage(luckyCodeFormError, '', false); const editId = luckyCodeEditIdInput.value; const code = luckyCodeCodeInput.value.trim().toUpperCase(); const reward = parseInt(luckyCodeRewardInput.value); const expiryInputVal = luckyCodeExpiryInput.value; let expiryTimestamp = null; if (!code) { setStatusMessage(luckyCodeFormError, "Code is required.", true); luckyCodeCodeInput.focus(); return; } if (isNaN(reward) || reward <= 0) { setStatusMessage(luckyCodeFormError, "Reward must be a positive number.", true); luckyCodeRewardInput.focus(); return; } if (!editId) { for (const existingId in adminLuckyCodesCache) { if (adminLuckyCodesCache[existingId].code === code) { setStatusMessage(luckyCodeFormError, `Code "${code}" already exists. Choose a different one.`, true); luckyCodeCodeInput.focus(); return; } } } if (expiryInputVal) { try { expiryTimestamp = new Date(expiryInputVal).getTime(); if (isNaN(expiryTimestamp)) throw new Error("Invalid date format"); } catch (e) { setStatusMessage(luckyCodeFormError, `Invalid Expiry Date/Time format: ${e.message}`, true); luckyCodeExpiryInput.focus(); return; } } setStatusMessage(luckyCodeFormError, 'Saving...', false, false, true); const codeData = { code: code, reward: reward, expiryTimestamp: expiryTimestamp, createdAt: editId ? (adminLuckyCodesCache[editId]?.createdAt || firebase.database.ServerValue.TIMESTAMP) : firebase.database.ServerValue.TIMESTAMP, updatedAt: firebase.database.ServerValue.TIMESTAMP }; if (codeData.expiryTimestamp === null) delete codeData.expiryTimestamp; const codeRefKey = editId || db.ref('luckyCodes').push().key; const codeRef = db.ref(`luckyCodes/${codeRefKey}`); codeRef.set(codeData).then(() => { console.log(`Lucky Code ${editId ? 'updated' : 'added'}: ${codeRefKey} (${code})`); adminLuckyCodesCache[codeRefKey] = { ...codeData, createdAt: codeData.createdAt || Date.now(), updatedAt: Date.now() }; hideLuckyCodeForm(); loadLuckyCodes(); showFlashMessage(`Lucky Code "${code}" ${editId ? 'updated' : 'saved'} successfully.`, 'success'); }).catch(error => { console.error("Error saving lucky code:", error); setStatusMessage(luckyCodeFormError, `Save Error: ${error.message}`, true); }); }
+        function handleDeleteLuckyCode(codeId) { const codeData = adminLuckyCodesCache[codeId]; const codeName = codeData?.code || codeId; if (!confirm(`DELETE Lucky Code "${codeName}"?\n\nThis action cannot be undone!`)) return; if (!confirm(`FINAL WARNING: Really delete code "${codeName}"?`)) return; if (!db) return; db.ref(`luckyCodes/${codeId}`).remove().then(() => { console.log(`Lucky Code ${codeId} deleted.`); delete adminLuckyCodesCache[codeId]; loadLuckyCodes(); showFlashMessage(`Lucky Code "${codeName}" deleted successfully.`, 'success'); }).catch(error => { console.error("Error deleting lucky code:", error); showFlashMessage(`Failed to delete lucky code. Error: ${error.message}`, "error"); }); }
+
+        // --- Message Templates Management ---
+        function loadTemplates(isDependency = false) { if (!db) return; if (!isDependency) { console.log("Loading message templates..."); setStatusMessage(templateListStatus, 'Loading templates...', false, false, true); templateTable.style.display = 'none'; templateTableBody.innerHTML = ''; } db.ref('messageTemplates').orderByChild('name').once('value').then(snapshot => { adminTemplatesCache = snapshot.val() || {}; if (!isDependency) { const templatesData = adminTemplatesCache; let count = 0; if (templatesData && Object.keys(templatesData).length > 0) { Object.keys(templatesData).forEach(templateId => { renderTemplateRow(templateId, templatesData[templateId]); count++; }); templateTable.style.display = 'table'; setStatusMessage(templateListStatus, '', false); } else { renderEmptyRow(templateTableBody, 3, "No templates found."); templateTable.style.display = 'table'; setStatusMessage(templateListStatus, '', false); } } if (isDependency || document.getElementById('send-message-modal')?.classList.contains('visible')) populateTemplateDropdown(sendMessageTemplateSelect, adminTemplatesCache, '-- Manual Message --'); if (isDependency || document.getElementById('autopilot')?.classList.contains('active')) { populateTemplateDropdown(autopilotTemplateSelect, adminTemplatesCache, '-- None (Disable Welcome Message) --'); if (adminAutopilotConfigCache?.welcomeMessage?.templateId) autopilotTemplateSelect.value = adminAutopilotConfigCache.welcomeMessage.templateId; } }).catch(error => { console.error("Error loading templates:", error); adminTemplatesCache = {}; if (!isDependency) { setStatusMessage(templateListStatus, 'Error loading templates. Check console.', true); renderEmptyRow(templateTableBody, 3, "Error loading templates."); templateTable.style.display = 'table'; } }); }
+        function renderTemplateRow(templateId, templateData) { const row = templateTableBody.insertRow(); row.dataset.templateId = templateId; let preview = escapeHtml(templateData.text || '').substring(0, 80); if ((templateData.text || '').length > 80) preview += '...'; if (templateData.image) preview += ` <i class="material-icons text-muted" title="Includes Image" style="font-size: 1.1em; vertical-align: text-bottom;">image</i>`; if (templateData.buttons && templateData.buttons.length > 0) preview += ` <i class="material-icons text-muted" title="Includes Buttons" style="font-size: 1.1em; vertical-align: text-bottom;">smart_button</i>`; row.innerHTML = ` <td><strong class="text-bold">${escapeHtml(templateData.name || 'Untitled')}</strong></td> <td><small>${preview || '<span class="text-muted">[No Text Content]</span>'}</small></td> <td class="table-actions"> <button class="btn btn-warning btn-xs" onclick="showEditTemplateForm('${templateId}')" title="Edit Template"><i class="material-icons">edit</i></button> <button class="btn btn-danger btn-xs" onclick="handleDeleteTemplate('${templateId}')" title="Delete Template"><i class="material-icons">delete</i></button> </td> `; }
+        function showAddTemplateForm() { templateFormBox.style.display = 'block'; templateFormTitle.textContent = 'Create New Template'; templateForm.reset(); templateEditIdInput.value = ''; templateButtonsContainer.innerHTML = ''; templateButtonsPlaceholder.style.display = 'block'; setStatusMessage(templateFormError, '', false); templateFormBox.scrollIntoView({ behavior: 'smooth', block: 'start' }); templateNameInput.focus(); }
+        function showEditTemplateForm(templateId) { const templateData = adminTemplatesCache[templateId]; if (!templateData) { showFlashMessage("Template data not found. Please refresh.", "error"); return; } templateFormBox.style.display = 'block'; templateFormTitle.textContent = 'Edit Template'; templateForm.reset(); templateEditIdInput.value = templateId; templateNameInput.value = templateData.name || ''; templateTextInput.value = templateData.text || ''; templateImageInput.value = templateData.image || ''; templateButtonsContainer.innerHTML = ''; templateButtonsPlaceholder.style.display = 'block'; setStatusMessage(templateFormError, '', false); if (templateData.buttons && Array.isArray(templateData.buttons)) { templateButtonsPlaceholder.style.display = 'none'; templateData.buttons.forEach(buttonRow => { if (Array.isArray(buttonRow) && buttonRow.length > 0) addTemplateButtonRow(buttonRow[0].text, buttonRow[0].url); }); } templateFormBox.scrollIntoView({ behavior: 'smooth', block: 'start' }); templateNameInput.focus(); }
+        function hideTemplateForm() { templateFormBox.style.display = 'none'; templateForm.reset(); templateEditIdInput.value = ''; templateButtonsContainer.innerHTML = ''; templateButtonsPlaceholder.style.display = 'block'; setStatusMessage(templateFormError, '', false); }
+        function addTemplateButtonRow(labelText = '', urlText = '') { if (templateButtonsContainer.children.length >= 5) { showFlashMessage("Maximum of 5 button rows allowed.", "warning"); return; } templateButtonsPlaceholder.style.display = 'none'; const div = document.createElement('div'); div.className = 'inline-button-row'; div.innerHTML = ` <input type="text" class="form-control template-button-label" placeholder="Button Label" value="${escapeHtml(labelText)}" required> <input type="url" class="form-control template-button-url" placeholder="Button URL (https://...)" value="${escapeHtml(urlText)}" required> <button type="button" class="btn btn-danger btn-xs" onclick="removeButtonRow(this, 'template-buttons-placeholder')" title="Remove Row"><i class="material-icons">remove_circle_outline</i></button> `; templateButtonsContainer.appendChild(div); }
+        function handleTemplateFormSubmit(event) { event.preventDefault(); if (!db) return; setStatusMessage(templateFormError, '', false); const templateId = templateEditIdInput.value; const name = templateNameInput.value.trim(); const text = templateTextInput.value.trim(); const image = templateImageInput.value.trim(); const buttons = []; let buttonsValid = true; if (!name) { setStatusMessage(templateFormError, "Template Name is required.", true); templateNameInput.focus(); return; } if (!text && !image) { setStatusMessage(templateFormError, "Template must have Text or an Image URL.", true); templateTextInput.focus(); return; } try { if (image) new URL(image); } catch (_) { setStatusMessage(templateFormError, "Image URL is invalid.", true); templateImageInput.focus(); return; } const buttonRows = templateButtonsContainer.querySelectorAll('.inline-button-row'); buttonRows.forEach(row => { const labelInput = row.querySelector('.template-button-label'); const urlInput = row.querySelector('.template-button-url'); const label = labelInput?.value.trim(); const url = urlInput?.value.trim(); if (label && url) { try { new URL(url); buttons.push([{ text: label, url: url }]); } catch (_) { buttonsValid = false; urlInput?.focus(); } } else if (label || url) { buttonsValid = false; if (!label) labelInput?.focus(); else urlInput?.focus(); } }); if (!buttonsValid) { setStatusMessage(templateFormError, 'Error: Incomplete or invalid button label/URL.', true); return; } setStatusMessage(templateFormError, 'Saving...', false, false, true); const templateData = { name: name, text: text || null, image: image || null, buttons: buttons.length > 0 ? buttons : null, createdAt: templateId ? (adminTemplatesCache[templateId]?.createdAt || firebase.database.ServerValue.TIMESTAMP) : firebase.database.ServerValue.TIMESTAMP, updatedAt: firebase.database.ServerValue.TIMESTAMP }; Object.keys(templateData).forEach(key => { if (templateData[key] === null) delete templateData[key]; }); const templateRef = templateId ? db.ref(`messageTemplates/${templateId}`) : db.ref('messageTemplates').push(); templateRef.set(templateData).then(() => { console.log(`Template ${templateId ? 'updated' : 'added'}: ${templateRef.key}`); adminTemplatesCache[templateRef.key] = { ...templateData, createdAt: templateData.createdAt || Date.now(), updatedAt: Date.now() }; hideTemplateForm(); loadTemplates(); showFlashMessage(`Template "${name}" ${templateId ? 'updated' : 'saved'} successfully.`, 'success'); }).catch(error => { console.error("Error saving template:", error); setStatusMessage(templateFormError, `Save Error: ${error.message}`, true); }); }
+        function handleDeleteTemplate(templateId) { const templateData = adminTemplatesCache[templateId]; const templateName = templateData?.name || templateId; if (!confirm(`DELETE Template "${templateName}"?\n\nThis action cannot be undone!`)) return; if (!confirm(`FINAL WARNING: Really delete template "${templateName}"?`)) return; if (!db) return; db.ref(`messageTemplates/${templateId}`).remove().then(() => { console.log(`Template ${templateId} deleted.`); delete adminTemplatesCache[templateId]; loadTemplates(); showFlashMessage(`Template "${templateName}" deleted successfully.`, 'success'); }).catch(error => { console.error("Error deleting template:", error); showFlashMessage(`Failed to delete template. Error: ${error.message}`, "error"); }); }
+
+        // --- Autopilot Configuration ---
+        function loadAutopilotConfig() {
+            if (!db) return;
+            console.log("Loading Autopilot config...");
+            setStatusMessage(autopilotTaskStatus, 'Loading settings...', false, false, true);
+            setStatusMessage(autopilotWelcomeStatus, 'Loading settings...', false, false, true);
+            autopilotTaskSelect.innerHTML = '<option value="">-- Loading Tasks --</option>';
+            autopilotTemplateSelect.innerHTML = '<option value="">-- Loading Templates --</option>';
+
+            db.ref('autopilotConfig').once('value')
+            .then(snapshot => {
+                adminAutopilotConfigCache = snapshot.val() || {};
+                loadAdminTasks(true);
+                loadTemplates(true);
+
+                const welcomeConfig = adminAutopilotConfigCache.welcomeMessage;
+                const totalMilliseconds = welcomeConfig?.delayMilliseconds || 0;
+                const totalSeconds = Math.floor(totalMilliseconds / 1000);
+                autopilotWelcomeDelayMinInput.value = Math.floor(totalSeconds / 60);
+                autopilotWelcomeDelaySecInput.value = totalSeconds % 60;
+                autopilotWelcomeDelayMsInput.value = totalMilliseconds % 1000;
+
+                setStatusMessage(autopilotTaskStatus, '', false);
+                setStatusMessage(autopilotWelcomeStatus, '', false);
+            })
+            .catch(error => {
+                console.error("Error loading autopilot config:", error);
+                adminAutopilotConfigCache = {};
+                setStatusMessage(autopilotTaskStatus, 'Error loading config.', true);
+                setStatusMessage(autopilotWelcomeStatus, 'Error loading config.', true);
+                loadAdminTasks(true);
+                loadTemplates(true);
+                showFlashMessage("Error loading Autopilot settings.", "error");
+            });
+        }
+
+        function handleSaveRecurringTask(event) { event.preventDefault(); if (!db) return; const selectedTaskId = autopilotTaskSelect.value; const configPath = 'autopilotConfig/recurringTask'; setStatusMessage(autopilotTaskStatus, 'Saving...', false, false, true); let saveOperation; if (selectedTaskId) saveOperation = db.ref(configPath).set({ taskId: selectedTaskId, updatedAt: firebase.database.ServerValue.TIMESTAMP }); else saveOperation = db.ref(configPath).remove(); saveOperation.then(() => { if (selectedTaskId) adminAutopilotConfigCache.recurringTask = { taskId: selectedTaskId }; else delete adminAutopilotConfigCache.recurringTask; setStatusMessage(autopilotTaskStatus, 'Recurring task setting saved!', false, true); console.log("Recurring task config updated."); }).catch(error => { console.error("Error saving recurring task config:", error); setStatusMessage(autopilotTaskStatus, `Save Error: ${error.message}`, true); }); }
+        function handleSaveWelcomeMessage(event) { event.preventDefault(); if (!db) return; setStatusMessage(autopilotWelcomeStatus, '', false); const selectedTemplateId = autopilotTemplateSelect.value; const minutes = parseInt(autopilotWelcomeDelayMinInput.value); const seconds = parseInt(autopilotWelcomeDelaySecInput.value); const milliseconds = parseInt(autopilotWelcomeDelayMsInput.value); const configPath = 'autopilotConfig/welcomeMessage'; if (isNaN(minutes) || minutes < 0) { setStatusMessage(autopilotWelcomeStatus, 'Invalid Minutes value (must be >= 0).', true); autopilotWelcomeDelayMinInput.focus(); return; } if (isNaN(seconds) || seconds < 0 || seconds > 59) { setStatusMessage(autopilotWelcomeStatus, 'Invalid Seconds value (must be 0-59).', true); autopilotWelcomeDelaySecInput.focus(); return; } if (isNaN(milliseconds) || milliseconds < 0 || milliseconds > 999) { setStatusMessage(autopilotWelcomeStatus, 'Invalid Milliseconds value (must be 0-999).', true); autopilotWelcomeDelayMsInput.focus(); return; } if (!selectedTemplateId && (minutes + seconds + milliseconds > 0)) { setStatusMessage(autopilotWelcomeStatus, 'Please select a template if setting a delay > 0.', true); autopilotTemplateSelect.focus(); return; } const totalDelayMilliseconds = (minutes * 60 * 1000) + (seconds * 1000) + milliseconds; setStatusMessage(autopilotWelcomeStatus, 'Saving...', false, false, true); let saveOperation; if (selectedTemplateId) saveOperation = db.ref(configPath).set({ templateId: selectedTemplateId, delayMilliseconds: totalDelayMilliseconds, updatedAt: firebase.database.ServerValue.TIMESTAMP }); else saveOperation = db.ref(configPath).remove(); saveOperation.then(() => { if (selectedTemplateId) adminAutopilotConfigCache.welcomeMessage = { templateId: selectedTemplateId, delayMilliseconds: totalDelayMilliseconds }; else delete adminAutopilotConfigCache.welcomeMessage; setStatusMessage(autopilotWelcomeStatus, 'Welcome message setting saved!', false, true); console.log("Welcome message config updated."); }).catch(error => { console.error("Error saving welcome message config:", error); setStatusMessage(autopilotWelcomeStatus, `Save Error: ${error.message}`, true); }); }
+
+        // --- Utility Functions ---
+        function formatAdminNumber(num) { if (typeof num !== 'number' || isNaN(num)) return '0'; return num.toLocaleString(); }
+        function escapeHtml(unsafe) { if (unsafe === null || typeof unsafe === 'undefined') return ''; return String(unsafe).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;"); }
+        function showModal(modalId) { const modal = document.getElementById(modalId); if (modal) modal.classList.add('visible'); }
+        function hideModal(modalId) { const modal = document.getElementById(modalId); if (modal) { modal.classList.remove('visible'); const statusEl = modal.querySelector('.modal-status, .form-status'); if (statusEl) setStatusMessage(statusEl, '', false); } }
+        function setStatusMessage(element, message, isError = false, isSuccess = false, isLoading = false) { if (!element) return; element.textContent = message; element.className = 'form-status modal-status'; if (isError) element.classList.add('error-message'); else if (isSuccess) element.classList.add('success-message'); else if (isLoading) element.classList.add('loading-message'); }
+        function populateDropdown(selectElement, dataCache, defaultOptionText) { if (!selectElement) return; const currentValue = selectElement.value; selectElement.innerHTML = `<option value="">${escapeHtml(defaultOptionText)}</option>`; const sortedKeys = Object.keys(dataCache).sort((a, b) => (dataCache[a]?.name || '').localeCompare(dataCache[b]?.name || '')); sortedKeys.forEach(id => { const item = dataCache[id]; const optionText = item.name ? `${item.name} (${id.substring(0, 6)}...)` : `ID: ${id}`; const option = document.createElement('option'); option.value = id; option.textContent = escapeHtml(optionText); if (selectElement === autopilotTaskSelect && item.isActive === false) { return; } selectElement.appendChild(option); }); if (currentValue && selectElement.querySelector(`option[value="${currentValue}"]`)) selectElement.value = currentValue; else selectElement.value = ""; }
+        function populateTaskDropdown(selectElement, tasks, defaultText) { populateDropdown(selectElement, tasks, defaultText); }
+        function populateTemplateDropdown(selectElement, templates, defaultText) { populateDropdown(selectElement, templates, defaultText); }
+        function renderEmptyRow(tbodyElement, colSpan, message = "No data available.") { if (!tbodyElement) return; tbodyElement.innerHTML = `<tr class="table-empty-row"><td colspan="${colSpan}">${escapeHtml(message)}</td></tr>`; }
+        function showFlashMessage(message, type = 'info') { const container = document.getElementById('flash-message-container') || document.body; const flashDiv = document.createElement('div'); flashDiv.className = `flash-message ${type}`; flashDiv.textContent = message; container.appendChild(flashDiv); requestAnimationFrame(() => { flashDiv.classList.add('show'); }); setTimeout(() => { flashDiv.classList.remove('show'); setTimeout(() => { flashDiv.remove(); }, 400); }, 3500); }
+
 
     </script>
-
 </body>
 </html>
