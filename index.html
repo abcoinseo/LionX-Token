@@ -415,7 +415,7 @@
         // --- Initialization ---
         window.onload = () => {
              try {
-                 isLoading = true; loadingDiv.textContent = "Initializing Meme Wolf...";
+                 isLoading = true; loadingDiv.textContent = "Initializing lion Xxxxxxxxxxxxxxxxxxxxxxxxxx...";
                  tg = window.Telegram.WebApp; tg.ready(); tg.expand();
                  try { const bgColor = getComputedStyle(document.documentElement).getPropertyValue('--primary-bg-end').trim(); tg.setHeaderColor(bgColor); tg.setBackgroundColor(bgColor); } catch (themeError) { console.warn("Could not set theme colors:", themeError); }
                  if (!tg.initDataUnsafe || !tg.initDataUnsafe.user) { showError("User data unavailable. Please launch from Telegram."); return; }
