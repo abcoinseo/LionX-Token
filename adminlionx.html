@@ -1214,16 +1214,3 @@
     </script>
 </body>
 </html>
-```
-
-**Changes Summary:**
-
-1.  **Firebase Configuration:** The `firebaseConfig` constant within the `<script>` tag has been updated with the new values you provided for `apiKey`, `authDomain`, `databaseURL`, `projectId`, `storageBucket`, `messagingSenderId`, and `appId`.
-2.  **Number Formatting (`formatAdminNumber` function):**
-    *   The `formatAdminNumber` function was rewritten to handle large numbers.
-    *   It now checks if a number is >= 1 Trillion, 1 Billion, 1 Million, or 1 Thousand.
-    *   Based on the threshold met, it divides the number, formats it to 1 or 2 decimal places (using `toFixed`), removes trailing `.0` or `.00` using `parseFloat`, and appends the appropriate suffix (T, B, M, K).
-    *   Numbers less than 1000 are returned directly without abbreviation.
-    *   This function is used in the Dashboard stats, User table (Coins), Task table (Reward), and Lucky Code table (Reward) automatically wherever `formatAdminNumber()` was previously called.
-
-The rest of the code, including the HTML structure, CSS styling, and other JavaScript functions, remains unchanged as requested. Remember the critical security warnings about running this client-side panel locally only.
