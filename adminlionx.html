@@ -3,148 +3,92 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Firebase Data Editor</title>
+    <title>Admin Panel - Task Management</title>
     <!-- Font Awesome CDN -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <style>
-        /* Basic Reset & Defaults */
+        /* --- Basic Reset & Defaults --- */
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f6f9; color: #444; display: flex; min-height: 100vh; line-height: 1.5; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f6f9; color: #444; display: flex; min-height: 100vh; line-height: 1.6; font-size: 14px; /* Slightly smaller base font */ }
         a { text-decoration: none; color: inherit; }
         ul { list-style: none; }
-        input, button, textarea { font-family: inherit; font-size: inherit; padding: 5px 8px; border: 1px solid #ccc; border-radius: 4px; margin: 2px; }
-        button { cursor: pointer; background-color: #e0e0e0; transition: background-color 0.2s ease; }
-        button:hover { background-color: #d0d0d0; }
-        button.delete-btn { background-color: #dc3545; color: white; border-color: #dc3545; margin-left: 10px; }
-        button.delete-btn:hover { background-color: #c82333; border-color: #bd2130; }
-        button.add-btn { background-color: #28a745; color: white; border-color: #28a745; margin-left: 5px;}
-        button.add-btn:hover { background-color: #218838; border-color: #1e7e34;}
+        button { cursor: pointer; font-family: inherit; padding: 8px 15px; border-radius: 4px; border: 1px solid transparent; transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease; }
+        input[type="text"], input[type="number"], input[type="url"], textarea, select {
+            width: 100%;
+            padding: 8px 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        textarea { resize: vertical; min-height: 60px; }
+        label { display: block; margin-bottom: 5px; font-weight: 500; color: #555; }
+        .form-group { margin-bottom: 15px; }
+        .form-check { display: flex; align-items: center; }
+        .form-check input[type="checkbox"] { width: auto; margin-right: 8px; margin-bottom: 0; }
 
-        /* Wrapper */
+        /* --- Layout (Similar to previous) --- */
         .wrapper { display: flex; width: 100%; }
-
-        /* Sidebar (Same as before) */
-        .sidebar { width: 250px; background-color: #343a40; color: #c2c7d0; display: flex; flex-direction: column; flex-shrink: 0; }
-        .sidebar-header { background-color: #007bff; padding: 15px 20px; text-align: center; font-size: 1.25rem; font-weight: bold; color: #fff; display: flex; justify-content: space-between; align-items: center; height: 60px; }
-        .sidebar-header .toggle-btn { display: none; background: none; border: none; color: #fff; font-size: 1.2rem; cursor: pointer; }
-        .sidebar-nav { padding-top: 15px; flex-grow: 1; }
+        .sidebar { width: 230px; background-color: #343a40; color: #c2c7d0; display: flex; flex-direction: column; flex-shrink: 0; transition: width 0.3s ease; }
+        .sidebar-header { background-color: #007bff; padding: 15px 20px; text-align: left; font-size: 1.2rem; font-weight: bold; color: #fff; display: flex; justify-content: space-between; align-items: center; height: 60px; }
+        .sidebar-nav { padding-top: 10px; flex-grow: 1; }
         .sidebar-nav ul { padding: 0; margin: 0; }
-        .sidebar-nav li a { display: flex; align-items: center; padding: 12px 20px; color: #c2c7d0; transition: background-color 0.2s ease, color 0.2s ease; }
+        .sidebar-nav li a { display: flex; align-items: center; padding: 10px 20px; color: #c2c7d0; transition: background-color 0.2s ease, color 0.2s ease; border-left: 3px solid transparent; }
         .sidebar-nav li a:hover { background-color: #495057; color: #fff; }
-        .sidebar-nav li.active a { background-color: #007bff; color: #fff; font-weight: 500; }
-        .sidebar-nav li a i { margin-right: 10px; width: 20px; text-align: center; }
+        .sidebar-nav li.active a { background-color: #007bff; color: #fff; font-weight: 500; border-left-color: #ffffff; }
+        .sidebar-nav li a i { margin-right: 12px; width: 20px; text-align: center; font-size: 1.1em; }
 
-        /* Main Content Area */
         .main-content { flex-grow: 1; display: flex; flex-direction: column; background-color: #e9ecf0; overflow-x: hidden; }
-
-        /* Top Bar (Same as before) */
-        .top-bar { background-color: #ffffff; border-bottom: 1px solid #dee2e6; padding: 0 20px; display: flex; justify-content: space-between; align-items: center; height: 60px; flex-shrink: 0; }
-        .top-bar .breadcrumb { font-size: 0.9rem; color: #6c757d; }
+        .top-bar { background-color: #ffffff; border-bottom: 1px solid #dee2e6; padding: 0 25px; display: flex; justify-content: space-between; align-items: center; height: 60px; flex-shrink: 0; }
+        .top-bar .breadcrumb { font-size: 0.95rem; color: #6c757d; }
         .top-bar .breadcrumb a { color: #007bff; }
         .top-bar .user-menu { font-weight: 500; color: #343a40; cursor: pointer; }
 
-        /* Editor Content */
-        .editor-container { padding: 25px; flex-grow: 1; overflow-y: auto; }
-        .editor-header { margin-bottom: 20px; }
-        .editor-header h1 { font-size: 1.8rem; font-weight: 400; color: #495057; }
+        /* --- Page Content --- */
+        .page-content { padding: 25px; flex-grow: 1; overflow-y: auto; }
+        .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 1px solid #dee2e6;}
+        .page-header h1 { font-size: 1.7rem; font-weight: 500; color: #333; margin: 0;}
+        .content-section { display: none; /* Hidden by default, shown by JS */ }
+        .content-section.active { display: block; }
 
-        #data-editor {
-            background-color: #fff;
-            padding: 20px;
-            border-radius: 5px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-            font-family: monospace; /* Better for viewing keys */
-            font-size: 0.9rem;
-        }
-         #data-editor .loading {
-            text-align: center;
-            padding: 30px;
-            font-style: italic;
-            color: #666;
-         }
+        /* --- Buttons --- */
+        .btn { display: inline-block; font-weight: 400; text-align: center; vertical-align: middle; user-select: none; background-color: transparent; border: 1px solid transparent; padding: 0.375rem 0.75rem; font-size: 1rem; line-height: 1.5; border-radius: 0.25rem; transition: color .15s ease-in-out,background-color .15s ease-in-out,border-color .15s ease-in-out,box-shadow .15s ease-in-out; }
+        .btn-primary { color: #fff; background-color: #007bff; border-color: #007bff; }
+        .btn-primary:hover { background-color: #0056b3; border-color: #0056b3; }
+        .btn-secondary { color: #fff; background-color: #6c757d; border-color: #6c757d; }
+        .btn-secondary:hover { background-color: #5a6268; border-color: #545b62; }
+        .btn-success { color: #fff; background-color: #28a745; border-color: #28a745; }
+        .btn-success:hover { background-color: #218838; border-color: #1e7e34; }
+        .btn-danger { color: #fff; background-color: #dc3545; border-color: #dc3545; }
+        .btn-danger:hover { background-color: #c82333; border-color: #bd2130; }
+        .btn-warning { color: #212529; background-color: #ffc107; border-color: #ffc107; }
+        .btn-warning:hover { color: #212529; background-color: #e0a800; border-color: #d39e00; }
+        .btn-sm { padding: 0.25rem 0.5rem; font-size: 0.875rem; line-height: 1.5; border-radius: 0.2rem; }
+        .action-buttons button { margin: 0 3px; }
 
-        /* Styling for Data Nodes */
-        .data-node {
-            margin-bottom: 8px;
-            padding-left: 20px; /* Indentation */
-            border-left: 1px dotted #eee;
-        }
-        .data-node > .node-header {
-            display: flex;
-            align-items: center;
-            margin-bottom: 4px;
-            cursor: pointer; /* Indicate collapsibility */
-            user-select: none;
-        }
-        .data-node > .node-header > .node-key {
-            font-weight: bold;
-            color: #0056b3; /* Dark blue for keys */
-            margin-right: 10px;
-        }
-         .data-node > .node-header > .node-type {
-            font-size: 0.8em;
-            color: #888;
-            margin-right: 10px;
-         }
-         .data-node > .node-header > .node-toggler {
-            font-size: 0.8em;
-            margin-right: 5px;
-            display: inline-block;
-            width: 1em;
-            text-align: center;
-         }
+        /* --- Tables --- */
+        .table-container { background-color: #fff; padding: 20px; border-radius: 5px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); overflow-x: auto; /* For smaller screens */ }
+        .table { width: 100%; border-collapse: collapse; margin-bottom: 1rem; background-color: transparent; }
+        .table th, .table td { padding: 0.8rem; vertical-align: top; border-top: 1px solid #dee2e6; text-align: left; }
+        .table thead th { vertical-align: bottom; border-bottom: 2px solid #dee2e6; background-color: #f8f9fa; font-weight: 600; color: #495057; }
+        .table tbody tr:hover { background-color: rgba(0, 0, 0, 0.05); }
+        .table td .task-description { max-width: 250px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: inline-block; vertical-align: middle; }
+        .table td .task-link { max-width: 150px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: inline-block; vertical-align: middle; color: #007bff; }
+        .table td .task-link:hover { text-decoration: underline; }
+        .loading-row td { text-align: center; padding: 20px; font-style: italic; color: #666; }
 
-        .data-node > .node-content {
-            /* Collapsible content */
-            /* display: none; */ /* Toggle with JS */
-        }
-         .data-node.collapsed > .node-content {
-             display: none;
-         }
-         .data-node.collapsed > .node-header > .node-toggler::before {
-             content: '+';
-         }
-         .data-node:not(.collapsed) > .node-header > .node-toggler::before {
-             content: '-';
-         }
-
-
-        .data-value { display: flex; align-items: center; }
-        .data-value input[type="text"], .data-value textarea {
-            flex-grow: 1;
-            margin-right: 5px;
-            border: 1px dashed #ddd; /* Subtle indication it's editable */
-        }
-         .data-value textarea {
-            min-height: 50px;
-            resize: vertical;
-         }
-        .data-value input[type="checkbox"] { margin-right: 5px; }
-        .data-value .value-display { /* For read-only or before edit */
-            padding: 5px 8px;
-            word-break: break-all; /* Wrap long values */
-        }
-        .data-value .value-type-string { color: #28a745; } /* Green for strings */
-        .data-value .value-type-number { color: #dc3545; } /* Red for numbers */
-        .data-value .value-type-boolean { color: #fd7e14; } /* Orange for booleans */
-        .data-value .value-type-null { color: #adb5bd; font-style: italic; } /* Gray for null */
-
-        .add-item-section {
-            margin-top: 10px;
-            padding-top: 10px;
-            border-top: 1px solid #eee;
-        }
-         .add-item-section input {
-             margin-right: 5px;
-         }
-
-        /* Simple Responsive */
-        @media (max-width: 768px) {
-            .sidebar { width: 0; overflow: hidden; } /* Simple hide */
-            .main-content { margin-left: 0; }
-             .data-node { padding-left: 10px; }
-             #data-editor { font-size: 0.85rem; }
-        }
+        /* --- Modal --- */
+        .modal { display: none; /* Hidden by default */ position: fixed; z-index: 1050; left: 0; top: 0; width: 100%; height: 100%; overflow: hidden; outline: 0; background-color: rgba(0, 0, 0, 0.5); }
+        .modal.show { display: block; }
+        .modal-dialog { position: relative; width: auto; margin: 50px auto; max-width: 600px; /* Adjust as needed */ pointer-events: none; }
+        .modal-content { position: relative; display: flex; flex-direction: column; width: 100%; pointer-events: auto; background-color: #fff; background-clip: padding-box; border: 1px solid rgba(0, 0, 0, 0.2); border-radius: 0.3rem; outline: 0; }
+        .modal-header { display: flex; align-items: flex-start; justify-content: space-between; padding: 1rem 1rem; border-bottom: 1px solid #dee2e6; border-top-left-radius: calc(0.3rem - 1px); border-top-right-radius: calc(0.3rem - 1px); }
+        .modal-title { margin-bottom: 0; line-height: 1.5; font-size: 1.25rem; font-weight: 500;}
+        .modal-header .close { padding: 1rem 1rem; margin: -1rem -1rem -1rem auto; background-color: transparent; border: 0; font-size: 1.5rem; font-weight: 700; line-height: 1; color: #000; text-shadow: 0 1px 0 #fff; opacity: .5; cursor: pointer;}
+        .modal-header .close:hover { opacity: .75; }
+        .modal-body { position: relative; flex: 1 1 auto; padding: 1rem; }
+        .modal-footer { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; padding: 0.75rem; border-top: 1px solid #dee2e6; border-bottom-right-radius: calc(0.3rem - 1px); border-bottom-left-radius: calc(0.3rem - 1px); }
+        .modal-footer > * { margin: 0.25rem; }
 
     </style>
 </head>
@@ -153,14 +97,15 @@
         <!-- Sidebar -->
         <aside class="sidebar">
             <div class="sidebar-header">
-                <span>Admin Editor</span>
-                 <button class="toggle-btn"><i class="fas fa-bars"></i></button>
+                <span>Admin Panel</span>
+                <!-- <button class="toggle-btn"><i class="fas fa-bars"></i></button> -->
             </div>
             <nav class="sidebar-nav">
-                <ul>
-                    <!-- Add sidebar links if needed -->
-                    <li class="active"><a href="#"><i class="fas fa-database"></i> <span>Data Editor</span></a></li>
-
+                <ul id="sidebar-menu">
+                    <li data-target="dashboard-content"><a href="#"><i class="fas fa-tachometer-alt"></i> <span>Dashboard</span></a></li>
+                    <li data-target="task-manager-content" class="active"><a href="#"><i class="fas fa-tasks"></i> <span>Task Management</span></a></li>
+                    <li data-target="user-manager-content"><a href="#"><i class="fas fa-users"></i> <span>User Management</span></a></li>
+                    <!-- Add other sections like lucky codes, templates etc. here -->
                 </ul>
             </nav>
         </aside>
@@ -169,29 +114,141 @@
         <div class="main-content">
             <!-- Top Bar -->
             <header class="top-bar">
-                <div><!-- Left placeholder --></div>
-                 <div style="display: flex; align-items: center;">
-                     <div class="breadcrumb">
-                        <i class="fas fa-home"></i> Admin / Data Editor
-                     </div>
-                     <div class="user-menu" style="margin-left: 20px;">
-                        Firebase Admin <i class="fas fa-caret-down"></i>
-                     </div>
-                </div>
+                 <div class="breadcrumb" id="breadcrumb">
+                    <a href="#"><i class="fas fa-home"></i> Home</a> / Task Management
+                 </div>
+                 <div class="user-menu">
+                    Admin User <i class="fas fa-caret-down"></i>
+                 </div>
             </header>
 
-            <!-- Editor Area -->
-            <main class="editor-container">
-                <div class="editor-header">
-                    <h1>Firebase Realtime Data Editor</h1>
+            <!-- Page Content Area -->
+            <main class="page-content">
+
+                <!-- Dashboard Section (Placeholder) -->
+                <div id="dashboard-content" class="content-section">
+                     <div class="page-header"><h1>Dashboard</h1></div>
+                     <p>Dashboard content goes here. (Could integrate the previous info boxes).</p>
                 </div>
 
-                <div id="data-editor">
-                    <div class="loading">Loading Firebase Data... <i class="fas fa-spinner fa-spin"></i></div>
+                <!-- Task Management Section -->
+                <div id="task-manager-content" class="content-section active">
+                    <div class="page-header">
+                        <h1>Task Management</h1>
+                        <button id="add-task-button" class="btn btn-primary"><i class="fas fa-plus"></i> Add New Task</button>
+                    </div>
+                    <div class="table-container">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Description</th>
+                                    <th>Reward</th>
+                                    <th>Type</th>
+                                    <th>Link/Target</th>
+                                    <th>Active</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tasks-table-body">
+                                <tr class="loading-row">
+                                    <td colspan="7">Loading tasks... <i class="fas fa-spinner fa-spin"></i></td>
+                                </tr>
+                                <!-- Task rows will be inserted here by JS -->
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
+
+                 <!-- User Management Section (Placeholder) -->
+                 <div id="user-manager-content" class="content-section">
+                     <div class="page-header"><h1>User Management</h1></div>
+                      <div class="table-container">
+                            <p>User management table and functionality would go here, similar to tasks.</p>
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>User ID</th>
+                                        <th>Username</th>
+                                        <th>First Name</th>
+                                        <th>Coins</th>
+                                        <th>Wallet</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="users-table-body">
+                                    <tr class="loading-row"><td colspan="6">Loading users... <i class="fas fa-spinner fa-spin"></i></td></tr>
+                                    <!-- User rows -->
+                                </tbody>
+                            </table>
+                      </div>
+                </div>
+
             </main>
         </div>
     </div>
+
+    <!-- Task Modal -->
+    <div class="modal" id="task-modal" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <form id="task-form">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="task-modal-title">Add New Task</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">×</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <input type="hidden" id="task-modal-id"> <!-- For storing ID during edit -->
+                        <div class="form-group">
+                            <label for="task-modal-name">Task Name</label>
+                            <input type="text" id="task-modal-name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="task-modal-description">Description</label>
+                            <textarea id="task-modal-description"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="task-modal-reward">Reward</label>
+                            <input type="number" id="task-modal-reward" required min="0">
+                        </div>
+                         <div class="form-group">
+                            <label for="task-modal-image">Image URL (Optional)</label>
+                            <input type="url" id="task-modal-image">
+                        </div>
+                         <div class="form-group">
+                            <label for="task-modal-link">Link/Target URL (Required for 'link' type)</label>
+                            <input type="url" id="task-modal-link">
+                        </div>
+                        <div class="form-group">
+                             <label for="task-modal-type">Task Type</label>
+                             <select id="task-modal-type">
+                                 <option value="link">Link Visit</option>
+                                 <!-- Add other types if needed -->
+                                 <option value="channel_join">Channel Join</option>
+                                 <option value="other">Other</option>
+                             </select>
+                        </div>
+                         <div class="form-group">
+                            <label for="task-modal-verification">Verification Time (seconds)</label>
+                            <input type="number" id="task-modal-verification" min="0" value="10">
+                        </div>
+                        <div class="form-group form-check">
+                            <input type="checkbox" id="task-modal-active">
+                            <label for="task-modal-active">Is Active</label>
+                        </div>
+
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary" id="task-modal-save-button">Save Task</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
 
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
@@ -212,333 +269,329 @@
         // --- Initialize Firebase ---
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
-        const rootRef = database.ref('/'); // Reference to the root
-        const editorContainer = document.getElementById('data-editor');
+        const tasksRef = database.ref('/tasks');
+        const usersRef = database.ref('/users'); // Ref for users section
 
-        // --- Data Rendering Function ---
-        function renderData(data, parentElement, path = '') {
-            parentElement.innerHTML = ''; // Clear previous content
+        // --- DOM Elements ---
+        const sidebarMenuItems = document.querySelectorAll('#sidebar-menu li');
+        const contentSections = document.querySelectorAll('.content-section');
+        const breadcrumb = document.getElementById('breadcrumb');
+        const tasksTableBody = document.getElementById('tasks-table-body');
+        const usersTableBody = document.getElementById('users-table-body'); // For user section
+        const addTaskButton = document.getElementById('add-task-button');
+        const taskModal = document.getElementById('task-modal');
+        const taskModalTitle = document.getElementById('task-modal-title');
+        const taskForm = document.getElementById('task-form');
+        const taskModalIdInput = document.getElementById('task-modal-id');
+        const taskModalNameInput = document.getElementById('task-modal-name');
+        const taskModalDescInput = document.getElementById('task-modal-description');
+        const taskModalRewardInput = document.getElementById('task-modal-reward');
+        const taskModalImageInput = document.getElementById('task-modal-image');
+        const taskModalLinkInput = document.getElementById('task-modal-link');
+        const taskModalTypeInput = document.getElementById('task-modal-type');
+        const taskModalVerificationInput = document.getElementById('task-modal-verification');
+        const taskModalActiveInput = document.getElementById('task-modal-active');
+        const taskModalSaveButton = document.getElementById('task-modal-save-button');
+        const modalCloseButtons = document.querySelectorAll('.modal .close, [data-dismiss="modal"]');
 
-            if (data === null || typeof data === 'undefined') {
-                parentElement.textContent = 'No data found at this path.';
+        // --- State ---
+        let currentEditTaskId = null; // To track if we are editing
+
+        // --- Helper Functions ---
+        function showModal(modalElement) {
+            modalElement.style.display = 'block';
+            modalElement.classList.add('show');
+            // Optional: Add body class to prevent scrolling while modal is open
+            document.body.classList.add('modal-open');
+        }
+
+        function hideModal(modalElement) {
+            modalElement.style.display = 'none';
+            modalElement.classList.remove('show');
+             document.body.classList.remove('modal-open');
+        }
+
+        function switchContent(targetId) {
+             contentSections.forEach(section => {
+                 section.classList.remove('active');
+             });
+             sidebarMenuItems.forEach(item => {
+                  item.classList.remove('active');
+             });
+
+             const targetSection = document.getElementById(targetId);
+             const targetMenuItem = document.querySelector(`#sidebar-menu li[data-target="${targetId}"]`);
+
+             if (targetSection) targetSection.classList.add('active');
+             if (targetMenuItem) {
+                 targetMenuItem.classList.add('active');
+                 // Update Breadcrumb
+                 const sectionName = targetMenuItem.querySelector('span').textContent;
+                 breadcrumb.innerHTML = `<a href="#"><i class="fas fa-home"></i> Home</a> / ${sectionName}`;
+             }
+        }
+
+        // --- Render Functions ---
+        function renderTasksTable(tasksData) {
+            tasksTableBody.innerHTML = ''; // Clear existing rows
+            if (!tasksData || Object.keys(tasksData).length === 0) {
+                tasksTableBody.innerHTML = '<tr class="loading-row"><td colspan="7">No tasks found.</td></tr>';
                 return;
             }
 
-            // Determine if the root is an object or array (Firebase often uses objects for arrays)
-             const isArrayLike = typeof data === 'object' && data !== null && Object.keys(data).every(k => /^\d+$/.test(k) || k.startsWith('-')); // Heuristic for array-like objects
-
-             const keys = Object.keys(data);
-
-             // Basic sorting: push() IDs first, then others alphabetically
-             keys.sort((a, b) => {
-                const isAPushId = a.startsWith('-');
-                const isBPushId = b.startsWith('-');
-                if (isAPushId && !isBPushId) return -1;
-                if (!isAPushId && isBPushId) return 1;
-                return a.localeCompare(b); // Alphabetical otherwise
+            // Sort tasks (e.g., by creation time, newest first if available)
+             const sortedTaskIds = Object.keys(tasksData).sort((a, b) => {
+                const timeA = tasksData[a].createdAt || 0;
+                const timeB = tasksData[b].createdAt || 0;
+                return timeB - timeA; // Descending order
              });
 
 
-             for (const key of keys) {
-                const value = data[key];
-                const currentPath = path ? `${path}/${key}` : key;
-                const nodeElement = document.createElement('div');
-                nodeElement.classList.add('data-node');
+            sortedTaskIds.forEach(taskId => {
+                const task = tasksData[taskId];
+                const row = document.createElement('tr');
+                row.dataset.id = taskId; // Store ID on the row
 
-                const nodeHeader = document.createElement('div');
-                nodeHeader.classList.add('node-header');
+                row.innerHTML = `
+                    <td>${escapeHtml(task.name || 'N/A')}</td>
+                    <td title="${escapeHtml(task.description || '')}"><span class="task-description">${escapeHtml(task.description || '')}</span></td>
+                    <td>${task.reward || 0}</td>
+                    <td>${escapeHtml(task.type || 'N/A')}</td>
+                    <td><a href="${escapeHtml(task.link || '#')}" target="_blank" class="task-link" title="${escapeHtml(task.link || '')}">${escapeHtml(task.link || 'N/A')}</a></td>
+                    <td>${task.isActive ? '<span class="badge badge-success" style="color: green; font-weight: bold;">Yes</span>' : '<span class="badge badge-secondary" style="color: grey;">No</span>'}</td>
+                    <td class="action-buttons">
+                        <button class="btn btn-warning btn-sm edit-task-button" title="Edit"><i class="fas fa-edit"></i></button>
+                        <button class="btn btn-danger btn-sm delete-task-button" title="Delete"><i class="fas fa-trash-alt"></i></button>
+                    </td>
+                `;
 
-                const nodeKey = document.createElement('span');
-                nodeKey.classList.add('node-key');
-                nodeKey.textContent = key + ':';
-                nodeHeader.appendChild(nodeKey);
+                // Add event listeners for edit/delete buttons
+                row.querySelector('.edit-task-button').addEventListener('click', () => openTaskModalForEdit(taskId, task));
+                row.querySelector('.delete-task-button').addEventListener('click', () => deleteTask(taskId, task.name));
 
-                const valueType = typeof value;
-                const isObject = value !== null && valueType === 'object';
+                tasksTableBody.appendChild(row);
+            });
+        }
 
-                if (isObject) {
-                    // Node Toggler for Objects/Arrays
-                    const toggler = document.createElement('span');
-                    toggler.classList.add('node-toggler');
-                    nodeHeader.appendChild(toggler);
-                    nodeHeader.addEventListener('click', (e) => {
-                        // Prevent delete button click from toggling
-                        if (e.target.tagName !== 'BUTTON') {
-                             nodeElement.classList.toggle('collapsed');
-                        }
-                    });
-
-                     const nodeType = document.createElement('span');
-                     nodeType.classList.add('node-type');
-                     // Simple check if it looks like an array based on keys
-                     const objKeys = Object.keys(value);
-                     const looksLikeArray = objKeys.length > 0 && objKeys.every(k => /^\d+$/.test(k) || k.startsWith('-'));
-                     nodeType.textContent = `(${looksLikeArray ? 'array' : 'object'}, ${objKeys.length} items)`;
-                     nodeHeader.appendChild(nodeType);
-
-
-                    // Delete Button for this Node
-                    const deleteButton = document.createElement('button');
-                    deleteButton.innerHTML = '<i class="fas fa-trash-alt"></i>';
-                    deleteButton.title = `Delete node "${key}"`;
-                    deleteButton.classList.add('delete-btn');
-                    deleteButton.onclick = (e) => {
-                        e.stopPropagation(); // Prevent toggle
-                        if (confirm(`Are you sure you want to delete the node "${key}" and all its contents at path: ${currentPath}?`)) {
-                            deleteNode(currentPath);
-                        }
-                    };
-                    nodeHeader.appendChild(deleteButton);
-
-                    // Add Key/Value Button for Objects
-                    const addButton = document.createElement('button');
-                    addButton.innerHTML = '<i class="fas fa-plus"></i> Add';
-                    addButton.title = `Add simple key/value to "${key}"`;
-                    addButton.classList.add('add-btn');
-                    addButton.onclick = (e) => {
-                        e.stopPropagation();
-                         addNewItem(currentPath);
-                    };
-                     nodeHeader.appendChild(addButton);
-
-
-                } else {
-                    // Delete button also for primitive values
-                    const deleteButton = document.createElement('button');
-                    deleteButton.innerHTML = '<i class="fas fa-trash-alt"></i>';
-                    deleteButton.title = `Delete field "${key}"`;
-                    deleteButton.classList.add('delete-btn');
-                    deleteButton.onclick = (e) => {
-                         e.stopPropagation();
-                        if (confirm(`Are you sure you want to delete the field "${key}" at path: ${currentPath}?`)) {
-                            deleteNode(currentPath);
-                        }
-                    };
-                    nodeHeader.appendChild(deleteButton);
-                }
-
-
-                nodeElement.appendChild(nodeHeader);
-
-                const nodeContent = document.createElement('div');
-                nodeContent.classList.add('node-content');
-
-                if (isObject) {
-                    renderData(value, nodeContent, currentPath); // Recurse
-                } else {
-                    // Render primitive value (editable)
-                    renderPrimitiveValue(value, nodeContent, currentPath, valueType);
-                }
-
-                nodeElement.appendChild(nodeContent);
-                parentElement.appendChild(nodeElement);
-            }
-
-             // Add Item section at the root level if the root is an object
-             if (typeof data === 'object' && data !== null && !Array.isArray(data) && path === '') { // Only at root for now
-                addAddItemSection(parentElement, path);
+        function renderUsersTable(usersData) {
+             usersTableBody.innerHTML = ''; // Clear existing rows
+             if (!usersData || Object.keys(usersData).length === 0) {
+                 usersTableBody.innerHTML = '<tr class="loading-row"><td colspan="6">No users found.</td></tr>';
+                 return;
              }
+
+             Object.keys(usersData).forEach(userId => {
+                 const user = usersData[userId];
+                 const telegramInfo = user.telegramInfo || {};
+                 const row = document.createElement('tr');
+
+                 row.innerHTML = `
+                    <td>${escapeHtml(userId)}</td>
+                    <td>@${escapeHtml(telegramInfo.username || 'N/A')}</td>
+                    <td>${escapeHtml(telegramInfo.firstName || 'N/A')} ${escapeHtml(telegramInfo.lastName || '')}</td>
+                    <td>${user.coins ? parseFloat(user.coins).toFixed(2) : '0.00'}</td>
+                     <td><span class="task-link">${escapeHtml(user.tonWallet || 'Not Set')}</span></td>
+                    <td class="action-buttons">
+                         <button class="btn btn-info btn-sm view-user-button" title="View Details (Not Implemented)"><i class="fas fa-eye"></i></button>
+                         <button class="btn btn-danger btn-sm delete-user-button" title="Delete User"><i class="fas fa-user-slash"></i></button>
+                    </td>
+                 `;
+                  // Add event listeners (Delete example)
+                  row.querySelector('.delete-user-button').addEventListener('click', () => deleteUser(userId, telegramInfo.username || userId));
+                  // View/Edit would require another modal or dedicated page
+
+                  usersTableBody.appendChild(row);
+             });
+
         }
 
-        // --- Render Editable Primitive Value ---
-        function renderPrimitiveValue(value, parentElement, path, type) {
-            const valueContainer = document.createElement('div');
-            valueContainer.classList.add('data-value');
-
-            let inputElement;
-
-            if (type === 'boolean') {
-                inputElement = document.createElement('input');
-                inputElement.type = 'checkbox';
-                inputElement.checked = value;
-                inputElement.addEventListener('change', () => {
-                    updateValue(path, inputElement.checked);
-                });
-                 valueContainer.appendChild(inputElement);
-                 const label = document.createElement('span');
-                 label.textContent = ` ${value}`; // Show true/false text
-                 label.classList.add(`value-type-${type}`);
-                 valueContainer.appendChild(label);
-
-            } else if (type === 'string' && value.length > 60) { // Use textarea for long strings
-                 inputElement = document.createElement('textarea');
-                 inputElement.value = value;
-                 inputElement.rows = 3;
-                 inputElement.addEventListener('blur', () => {
-                    updateValue(path, inputElement.value);
-                });
-                 valueContainer.appendChild(inputElement);
-            }
-            else { // String, Number, or other primitives treated as text
-                 inputElement = document.createElement('input');
-                 inputElement.type = 'text';
-                 inputElement.value = value === null ? 'null' : value; // Display null explicitly
-                 inputElement.classList.add(`value-type-${type}`);
-                 if (value === null) inputElement.classList.add('value-type-null');
-
-                inputElement.addEventListener('blur', () => {
-                     let newValue = inputElement.value;
-                     // Try to convert back to original type if possible
-                     if (value === null && newValue.toLowerCase() === 'null') {
-                         newValue = null;
-                     } else if (type === 'number') {
-                         const num = parseFloat(newValue);
-                         if (!isNaN(num)) {
-                             newValue = num;
-                         } else {
-                              console.warn(`Invalid number input for ${path}: ${inputElement.value}. Saving as string.`);
-                              // Keep as string if parsing fails
-                         }
-                     } else if (type === 'boolean') { // Should be handled by checkbox, but fallback
-                         if (newValue.toLowerCase() === 'true') newValue = true;
-                         else if (newValue.toLowerCase() === 'false') newValue = false;
-                         // Keep as string otherwise
-                     }
-                     // Only update if value actually changed
-                     if (newValue !== value) {
-                         updateValue(path, newValue);
-                     }
-                 });
-                 valueContainer.appendChild(inputElement);
-            }
-
-
-            parentElement.appendChild(valueContainer);
-        }
-
-         // --- Function to add an "Add Item" section ---
-         function addAddItemSection(parentElement, path) {
-             const addSection = document.createElement('div');
-             addSection.classList.add('add-item-section');
-             addSection.innerHTML = `
-                 <input type="text" placeholder="New Key" class="new-item-key">
-                 <input type="text" placeholder="New Value (string)" class="new-item-value">
-                 <button class="add-confirm-btn"><i class="fas fa-check"></i> Add</button>
-             `;
-             const keyInput = addSection.querySelector('.new-item-key');
-             const valueInput = addSection.querySelector('.new-item-value');
-             const addButton = addSection.querySelector('.add-confirm-btn');
-
-             addButton.onclick = () => {
-                 const newKey = keyInput.value.trim();
-                 const newValue = valueInput.value; // Keep as string initially
-                 if (!newKey) {
-                     alert('Please enter a key for the new item.');
-                     return;
-                 }
-                 // Basic check to prevent overwriting existing keys via this simple add form
-                 const currentDataRef = database.ref(path);
-                 currentDataRef.child(newKey).once('value', snapshot => {
-                     if (snapshot.exists()) {
-                         alert(`Key "${newKey}" already exists at this level. Choose a different key or edit the existing one.`);
-                     } else {
-                          const updates = {};
-                          updates[newKey] = newValue; // Add the new key/value pair
-                          currentDataRef.update(updates)
-                             .then(() => {
-                                 console.log(`Added item: ${path}/${newKey}`);
-                                 keyInput.value = ''; // Clear inputs after adding
-                                 valueInput.value = '';
-                                 // Data will refresh automatically via onValue listener
-                             })
-                             .catch(error => {
-                                 console.error(`Error adding item at ${path}/${newKey}:`, error);
-                                 alert(`Failed to add item: ${error.message}`);
-                             });
-                     }
-                 });
-             };
-             parentElement.appendChild(addSection);
-         }
-
-
-        // --- Firebase Update Function ---
-        function updateValue(path, newValue) {
-            console.log(`Updating ${path} to:`, newValue);
-            database.ref(path).set(newValue)
-                .then(() => {
-                    console.log(`Successfully updated ${path}`);
-                    // Optionally add visual feedback
-                })
-                .catch(error => {
-                    console.error(`Error updating ${path}:`, error);
-                    alert(`Failed to update value: ${error.message}`);
-                    // Optionally revert UI change here
-                });
-        }
-
-        // --- Firebase Delete Function ---
-        function deleteNode(path) {
-            console.log(`Deleting node at ${path}`);
-            database.ref(path).remove()
-                .then(() => {
-                    console.log(`Successfully deleted ${path}`);
-                     // Data will refresh via onValue listener
-                })
-                .catch(error => {
-                    console.error(`Error deleting ${path}:`, error);
-                    alert(`Failed to delete node: ${error.message}`);
-                });
-        }
-
-         // --- Firebase Add New Item (via prompt or push for collections) ---
-         function addNewItem(path) {
-             // Heuristic check if this path looks like a collection needing push()
-             // Examples: /tasks, /luckyCodes, /messageTemplates
-             const pathSegments = path.split('/');
-             const lastSegment = pathSegments[pathSegments.length - 1];
-              const needsPush = ['tasks', 'luckyCodes', 'messageTemplates'].includes(lastSegment);
-
-             if (needsPush) {
-                 const newItemRef = database.ref(path).push(); // Generate unique ID
-                 const defaultItem = {
-                     name: "New Item (Edit Me)",
-                     createdAt: firebase.database.ServerValue.TIMESTAMP,
-                     updatedAt: firebase.database.ServerValue.TIMESTAMP,
-                     // Add other default fields common to your collections if desired
-                     description: "",
-                     isActive: false,
-                     reward: 0,
-                 };
-                 newItemRef.set(defaultItem)
-                     .then(() => console.log(`Added new item with default values at ${newItemRef.key}`))
-                     .catch(error => console.error("Error adding new item:", error));
-             } else {
-                  // For regular objects, use the Add Key/Value section already rendered
-                  alert('Use the "Add Key" / "Add Value" fields below the object to add simple properties.');
-                  // Or implement a prompt-based approach:
-                  /*
-                  const newKey = prompt(`Enter the key for the new item under "${path}":`);
-                  if (newKey) {
-                     const newValue = prompt(`Enter the value for "${newKey}":`, ""); // Default to empty string
-                     if (newValue !== null) { // Check if user cancelled prompt
-                        const updates = {};
-                        updates[newKey] = newValue;
-                        database.ref(path).update(updates)
-                           .then(() => console.log(`Added item: ${path}/${newKey}`))
-                           .catch(error => console.error(`Error adding item at ${path}/${newKey}:`, error));
-                     }
-                  }
-                  */
+        // Simple HTML escaping function
+        function escapeHtml(unsafe) {
+             if (typeof unsafe !== 'string') {
+                 return unsafe; // Return non-strings as is
              }
-         }
+            return unsafe
+                 .replace(/&/g, "&")
+                 .replace(/</g, "<")
+                 .replace(/>/g, ">")
+                 .replace(/"/g, """)
+                 .replace(/'/g, "'");
+        }
 
 
-        // --- Listen for Data Changes ---
-        rootRef.on('value', (snapshot) => {
-            console.log("Firebase data received/updated.");
-            if (snapshot.exists()) {
-                const data = snapshot.val();
-                renderData(data, editorContainer); // Re-render the entire structure
+        // --- Modal Operations ---
+        function openTaskModalForAdd() {
+            currentEditTaskId = null; // Ensure we are in 'add' mode
+            taskForm.reset(); // Clear the form
+            taskModalIdInput.value = '';
+            taskModalTitle.textContent = 'Add New Task';
+            taskModalActiveInput.checked = true; // Default to active
+            taskModalSaveButton.textContent = 'Save Task';
+            showModal(taskModal);
+        }
+
+        function openTaskModalForEdit(taskId, taskData) {
+            currentEditTaskId = taskId;
+            taskForm.reset(); // Clear first
+            taskModalIdInput.value = taskId;
+            taskModalTitle.textContent = `Edit Task: ${taskData.name || taskId}`;
+            taskModalNameInput.value = taskData.name || '';
+            taskModalDescInput.value = taskData.description || '';
+            taskModalRewardInput.value = taskData.reward || 0;
+            taskModalImageInput.value = taskData.imageUrl || '';
+            taskModalLinkInput.value = taskData.link || '';
+            taskModalTypeInput.value = taskData.type || 'link';
+            taskModalVerificationInput.value = taskData.verificationTime || 10;
+            taskModalActiveInput.checked = taskData.isActive || false;
+            taskModalSaveButton.textContent = 'Update Task';
+            showModal(taskModal);
+        }
+
+        function saveTaskData(event) {
+            event.preventDefault(); // Prevent default form submission
+
+            const taskData = {
+                name: taskModalNameInput.value.trim(),
+                description: taskModalDescInput.value.trim(),
+                reward: parseFloat(taskModalRewardInput.value) || 0,
+                imageUrl: taskModalImageInput.value.trim(),
+                link: taskModalLinkInput.value.trim(),
+                type: taskModalTypeInput.value,
+                verificationTime: parseInt(taskModalVerificationInput.value) || 10,
+                isActive: taskModalActiveInput.checked,
+                updatedAt: firebase.database.ServerValue.TIMESTAMP // Always update timestamp
+            };
+
+            // Basic validation
+            if (!taskData.name || taskData.reward < 0) {
+                alert('Please fill in Task Name and ensure Reward is non-negative.');
+                return;
+            }
+             if (taskData.type === 'link' && !taskData.link) {
+                 alert('Link URL is required for task type "link".');
+                 return;
+             }
+
+            let promise;
+            if (currentEditTaskId) {
+                // --- Update Existing Task ---
+                console.log(`Updating task ${currentEditTaskId}`);
+                promise = tasksRef.child(currentEditTaskId).update(taskData);
             } else {
-                editorContainer.innerHTML = '<div class="loading">No data found in Firebase root.</div>';
-                console.log("No data available at root.");
+                // --- Add New Task ---
+                console.log("Adding new task");
+                 taskData.createdAt = firebase.database.ServerValue.TIMESTAMP; // Add createdAt for new tasks
+                promise = tasksRef.push(taskData);
             }
-        }, (error) => {
-            console.error("Firebase read failed:", error);
-            editorContainer.innerHTML = `<div class="loading" style="color: red;">Error connecting to Firebase: ${error.message}</div>`;
+
+            promise
+                .then(() => {
+                    console.log("Task saved successfully!");
+                    hideModal(taskModal);
+                     taskForm.reset(); // Reset form after successful save
+                     // Table will update automatically via the onValue listener
+                })
+                .catch(error => {
+                    console.error("Error saving task:", error);
+                    alert(`Error saving task: ${error.message}`);
+                });
+        }
+
+        // --- Delete Operations ---
+        function deleteTask(taskId, taskName) {
+            if (confirm(`Are you sure you want to delete the task "${taskName || taskId}"? This action cannot be undone.`)) {
+                console.log(`Deleting task ${taskId}`);
+                tasksRef.child(taskId).remove()
+                    .then(() => {
+                        console.log("Task deleted successfully.");
+                         // Table updates automatically
+                    })
+                    .catch(error => {
+                         console.error("Error deleting task:", error);
+                         alert(`Error deleting task: ${error.message}`);
+                    });
+            }
+        }
+
+         function deleteUser(userId, userName) {
+             if (confirm(`Are you sure you want to delete the user "${userName}" (ID: ${userId})? This will remove all their data.`)) {
+                 console.log(`Deleting user ${userId}`);
+                 usersRef.child(userId).remove()
+                     .then(() => {
+                         console.log("User deleted successfully.");
+                          // Table updates automatically
+                     })
+                     .catch(error => {
+                          console.error("Error deleting user:", error);
+                          alert(`Error deleting user: ${error.message}`);
+                     });
+             }
+         }
+
+
+        // --- Event Listeners ---
+
+        // Sidebar Navigation
+        sidebarMenuItems.forEach(item => {
+            item.addEventListener('click', (e) => {
+                e.preventDefault();
+                const targetId = item.getAttribute('data-target');
+                if (targetId) {
+                    switchContent(targetId);
+                }
+            });
         });
 
+        // Add Task Button
+        addTaskButton.addEventListener('click', openTaskModalForAdd);
+
+        // Modal Form Submission
+        taskForm.addEventListener('submit', saveTaskData);
+
+        // Modal Close Buttons
+        modalCloseButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                hideModal(taskModal); // Assuming only one modal for now
+            });
+        });
+         // Close modal if clicking outside the content
+         taskModal.addEventListener('click', (event) => {
+            if (event.target === taskModal) { // Check if the click is on the backdrop itself
+                hideModal(taskModal);
+            }
+        });
+
+
+        // Firebase Data Listeners
+        tasksRef.on('value', (snapshot) => {
+            console.log("Tasks data received/updated.");
+            if (snapshot.exists()) {
+                renderTasksTable(snapshot.val());
+            } else {
+                 tasksTableBody.innerHTML = '<tr class="loading-row"><td colspan="7">No tasks found in database.</td></tr>';
+            }
+        }, (error) => {
+             console.error("Firebase tasks read failed:", error);
+             tasksTableBody.innerHTML = `<tr class="loading-row"><td colspan="7" style="color: red;">Error loading tasks: ${error.message}</td></tr>`;
+        });
+
+         usersRef.on('value', (snapshot) => {
+            console.log("Users data received/updated.");
+             if (snapshot.exists()) {
+                 renderUsersTable(snapshot.val());
+             } else {
+                  usersTableBody.innerHTML = '<tr class="loading-row"><td colspan="6">No users found in database.</td></tr>';
+             }
+         }, (error) => {
+              console.error("Firebase users read failed:", error);
+              usersTableBody.innerHTML = `<tr class="loading-row"><td colspan="6" style="color: red;">Error loading users: ${error.message}</td></tr>`;
+         });
+
+
+        // --- Initial Setup ---
+        switchContent('task-manager-content'); // Start on the task manager page
+
     </script>
+
 </body>
 </html>
